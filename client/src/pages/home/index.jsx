@@ -3,6 +3,7 @@ import { View, FlatList } from '@tarojs/components'
 
 import Login from '../../components/login/index'
 import TimeListItem from '../../components/timeListItem'
+import Guide from '../../components/guide'
 
 import { AtFab, AtActionSheet, AtActionSheetItem } from 'taro-ui'
 
@@ -24,6 +25,7 @@ export default class Index extends Component {
             showDrawer: false,
             showSheet: false,
             selectTimer: {},
+            isAuthorize: false,
         }
     }
 
@@ -33,6 +35,9 @@ export default class Index extends Component {
         Taro.getSetting().then((res) => {
             if(!!res.authSetting['scope.userInfo']) {
                 console.log('已授权', res)
+                this.setState({
+                    isAuthorize: true,
+                })
             } else {
                 console.log('未授权', err)
             }
@@ -111,6 +116,7 @@ export default class Index extends Component {
 
     render() {
 
+        const { isAuthorize } = this.state;
         const { screenWidth, screenHeight, windowHeight, statusBarHeight } = Taro.getSystemInfoSync()
 
         console.log(screenHeight, windowHeight)
@@ -123,27 +129,34 @@ export default class Index extends Component {
                 </View>
                 <View className='index__body' style={{backgroundColor: '#e5e5e5', width: '100%'}}>
                     <View style={{ height: Taro.pxTransform(20) }}></View>
-                    {
-                        [1, 1, 1, 1, 1, 1, 1].map((item, index) => {
+                    { !isAuthorize && <Guide></Guide> }
+                    { !!isAuthorize &&
+                        [1,2,3].map((item, index) => {
                             return (
                                 <View key={index}>
                                     <TimeListItem
-                                        title={'老婆的生日'}
+                                        title={'黄色表示倒计时'}
                                         startTime={Date.parse(new Date())}
-                                        endTime={Date.parse(new Date(2019, 10 - 1, 12))}
+                                        endTime={Date.parse(new Date(2020, 0, 1))}
+                                    ></TimeListItem>
+                                    <View style={{ height: Taro.pxTransform(20) }}></View>
+                                    <TimeListItem
+                                        title={'红色表示倒计时已超出'}
+                                        startTime={Date.parse(new Date())}
+                                        endTime={Date.parse(new Date(2019, 10 - 1, 1))}
                                         onLongPress={ () => this.onLongPressTimer(item) }
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
                                     <TimeListItem
                                         isCountDown={false}
-                                        title={'2019已经过了'}
+                                        title={'绿色表示正计时'}
                                         startTime={Date.parse(new Date(2019, 0, 1))}
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
                                     <TimeListItem
-                                        title={'新年'}
-                                        startTime={Date.parse(new Date())}
-                                        endTime={Date.parse(new Date(2020, 0, 1))}
+                                        isCountDown={false}
+                                        title={'长按选择编辑和删除'}
+                                        startTime={Date.parse(new Date(2019, 0, 1))}
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
                                 </View>

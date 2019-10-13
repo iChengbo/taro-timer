@@ -1,3 +1,6 @@
+
+const weekArr = ['日', '一', '二', '三', '四', '五', '六']
+
 /**
  * 计算时间, 将秒转换为天、时、分、秒
  */
@@ -18,3 +21,35 @@ export const calculateTime = (duration) => {
         seconds: seconds < 10 ? `0${seconds}`: seconds,
     }
 }
+
+/**
+ * 
+ */
+export const getTimeInfo = (time = new Date()) => {
+    const year = time.getFullYear();
+    const month = time.getMonth() + 1;
+    const day = time.getDate();
+
+    const hours = time.getHours();
+    const minutes = time.getMinutes();
+    const seconds = time.getSeconds();
+
+    // 一星期的第几天
+    const numWeek = time.getDay();
+    // 星期几
+    const week = numWeek == 0? 7 : (numWeek+1);
+    const weekZH = weekArr[numWeek];
+
+    return {
+        year,
+        month,
+        day,
+        hours: hours < 10 ? `0${hours}`: hours,
+        minutes: minutes < 10 ? `0${minutes}`: minutes,
+        seconds: seconds < 10 ? `0${seconds}`: seconds,
+        numWeek,
+        week,
+        weekZH: `星期${weekZH}`,
+    }
+}
+
