@@ -113,6 +113,10 @@ export default class TimeListItem extends Component {
     componentDidShow() { }
 
     componentDidHide() { }
+    
+    onLongPress() {
+        this.props.onLongPress && this.props.onLongPress()
+    }
 
     render() {
         const { _day, _hours, _minutes, _seconds, isTimeOut } = this.state
@@ -129,7 +133,7 @@ export default class TimeListItem extends Component {
             }
         }
         return (
-            <View className='timeListItem' style={{ }}>
+            <View className='timeListItem' onLongPress={ () => this.onLongPress() }>
                 <View className='timeListItem__tag' style={{ backgroundColor: bgColor }}></View>
                 <View className='fstLineWrap'>
                     <View className='fstLeftWrap'>
@@ -168,4 +172,5 @@ TimeListItem.propTypes = {
     startTime: PropTypes.number,
     endTime: PropTypes.number,
     onCountEnd: PropTypes.func,
+    onLongPress: PropTypes.func,
 }

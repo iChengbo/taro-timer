@@ -17,6 +17,7 @@ class App extends Component {
       'pages/home/index',
       'pages/publish/index',
       'pages/user/index',
+      'pages/poster/index',
     ],
     window: {
       backgroundTextStyle: 'light',

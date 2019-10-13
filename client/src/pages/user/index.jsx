@@ -26,42 +26,18 @@ export default class User extends Component {
         }
     }
 
-    /**
-     * 
-     * @param {string} screen
-     */
     handleClickListItem(screen, params) {
         Taro.showToast({
             title: '该页面还未完成，敬请期待',
             icon: 'none',
             duration: 2000
         })
-        Taro.authorize()
-    }
-
-    onGotUserInfo(e) {
-        console.log('e', e)
-        this.setState({
-            userInfo: e.detail.userInfo
-        })
-        // Taro.showModal({
-        //     title: '用户信息',
-        //     content: JSON.stringify(userInfo),
-        // })
     }
 
     render() {
         let { userInfo } = this.state 
         return (
             <View className='user'>
-                <Button openType='getUserInfo' onGetUserInfo={ (e) => this.onGotUserInfo(e) } type='primary'>按钮</Button>
-                <Text>{ userInfo.avatarUrl }</Text>
-                <Text>{ userInfo.city }</Text>
-                <Text>{ userInfo.country }</Text>
-                <Text>{ userInfo.gender }</Text>
-                <Text>{ userInfo.language }</Text>
-                <Text>{ userInfo.nickName }</Text>
-                <Text>{ userInfo.province }</Text>
                 <View className='user__header'>
                     <AtAvatar openData={{ type: 'userAvatarUrl' }} size='large' circle={true}></AtAvatar>
                 </View>

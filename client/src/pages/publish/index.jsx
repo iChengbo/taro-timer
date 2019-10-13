@@ -12,9 +12,10 @@ export default class PagePicker extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            timeSel: '00:00',
+            value: '',
             dateSel: '2018-04-22',
-            value: ''
+            timeSel: '00:00',
+            isTop: false,
         }
     }
 
@@ -25,16 +26,26 @@ export default class PagePicker extends Component {
         // 在小程序中，如果想改变 value 的值，需要 `return value` 从而改变输入框的当前值
         return value
     }
+    
     onTimeChange = e => {
         this.setState({
             timeSel: e.detail.value
         })
     }
+
     onDateChange = e => {
         this.setState({
             dateSel: e.detail.value
         })
     }
+
+    onIsTopChange = isChecked => {
+        console.log(isChecked)
+        this.setState({
+            isTop: isChecked
+        })
+    }
+
     render() {
         return (
             <View className='container'>
@@ -54,6 +65,7 @@ export default class PagePicker extends Component {
                                     name='value'
                                     title='日期'
                                     type='text'
+                                    editable={false}
                                     placeholder='标准五个字'
                                     value={this.state.dateSel}
                                 />
@@ -68,6 +80,7 @@ export default class PagePicker extends Component {
                                         name='value'
                                         title='时间'
                                         type='text'
+                                        editable={false}
                                         placeholder='标准五个字'
                                         value={this.state.timeSel}
                                     />
@@ -75,7 +88,7 @@ export default class PagePicker extends Component {
                             </Picker>
                         </View>
                     </View>
-                <AtSwitch checked={true} title='置顶' />
+                <AtSwitch title='置顶' onChange={ (value) => this.onIsTopChange(value) }/>
                 </View>
                 <View className='save-btn'>
                     <AtButton type='primary' circle={true}>保存</AtButton>

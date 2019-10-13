@@ -4,7 +4,7 @@ import { View, FlatList } from '@tarojs/components'
 import Login from '../../components/login/index'
 import TimeListItem from '../../components/timeListItem'
 
-import { AtDrawer, AtFab, AtGrid } from 'taro-ui'
+import { AtFab, AtActionSheet, AtActionSheetItem } from 'taro-ui'
 
 import './index.scss'
 
@@ -21,19 +21,22 @@ export default class Index extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            showDrawer: false
+            showDrawer: false,
+            showSheet: false,
+            selectTimer: {},
         }
     }
 
-    componentWillMount() {
-        Taro.getSystemInfo({
-            success: res => console.log(res)
-        })
-            .then(res => console.log(res))
-    }
+    componentWillMount() { }
 
     componentDidMount() {
-        // Taro.hideTabBar()
+        Taro.getSetting().then((res) => {
+            if(!!res.authSetting['scope.userInfo']) {
+                console.log('已授权', res)
+            } else {
+                console.log('未授权', err)
+            }
+        })
     }
 
     componentWillUnmount() { }
@@ -63,18 +66,50 @@ export default class Index extends Component {
             duration: 2000
         })
     }
+
+    onLongPressTimer(timerItem) {
+        this.setState({
+            showSheet: true,
+            selectTimer: timerItem,
+        })
+    }
+    deleteSelectTimer() {
+        this.setState({
+            showSheet: false,
+        }, () => {
+            Taro.showToast({
+                title: 'deleteSelectTimer',
+                icon: 'none',
+                duration: 2000
+            })
+        })
+    }
+
+    editSelectTimer() {
+        this.setState({
+            showSheet: false,
+        }, () => {
+            Taro.showToast({
+                title: 'editSelectTimer',
+                icon: 'none',
+                duration: 2000
+            })
+        })
+    }
+
+    posterSelectTimer() {
+        const { selectTimer } = this.state;
+        const timerId = selectTimer.id;
+        this.setState({
+            showSheet: false,
+        }, () => {
+            Taro.navigateTo({
+                url: `/pages/poster/index?timerId=${timerId}`
+            })
+        })
+    }
+
     render() {
-        let mockData = [{
-            id: 1,
-            title: '老婆的生日',
-            startTime: Date.parse(new Date()),
-            endTime: Date.parse(new Date(2019, 10 - 1, 12)),
-        }, {
-            id: 2,
-            title: '2019已经过了',
-            startTime: Date.parse(new Date(2019, 1, 1)),
-            endTime: Date.parse(new Date(2020, 1, 1)),
-        }]
 
         const { screenWidth, screenHeight, windowHeight, statusBarHeight } = Taro.getSystemInfoSync()
 
@@ -86,22 +121,8 @@ export default class Index extends Component {
                         <Text className='at-fab__icon at-icon at-icon-add'></Text>
                     </AtFab>
                 </View>
-                {/* <View
-                    className='index__header'
-                    style={{
-                        flex: 1,
-                        // width: Taro.pxTransform(2*screenWidth),
-                        height: Taro.pxTransform(2 * screenWidth * 9 / 16),
-                    }}>
-                    <Image
-                        style={{ height: '100%', width: '100%' }}
-                        mode={'aspectFill'}
-                        src={'../../images/test.png'}
-                        // src={'https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1570807448793&di=13a835c549150bcd12fec2c50bd493e9&imgtype=0&src=http%3A%2F%2Fimg.pconline.com.cn%2Fimages%2Fupload%2Fupc%2Ftx%2Fitbbs%2F1705%2F24%2Fc28%2F47958182_1495620463403_mthumb.jpg'}
-                    ></Image>
-                </View> */}
-                {/* <View style={{ height: Taro.pxTransform(10) }}></View> */}
                 <View className='index__body' style={{backgroundColor: '#e5e5e5', width: '100%'}}>
+                    <View style={{ height: Taro.pxTransform(20) }}></View>
                     {
                         [1, 1, 1, 1, 1, 1, 1].map((item, index) => {
                             return (
@@ -110,6 +131,7 @@ export default class Index extends Component {
                                         title={'老婆的生日'}
                                         startTime={Date.parse(new Date())}
                                         endTime={Date.parse(new Date(2019, 10 - 1, 12))}
+                                        onLongPress={ () => this.onLongPressTimer(item) }
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
                                     <TimeListItem
@@ -129,6 +151,17 @@ export default class Index extends Component {
                         })
                     }
                 </View>
+                <AtActionSheet isOpened={this.state.showSheet} cancelText='取消'>
+                    <AtActionSheetItem onClick={ () => this.deleteSelectTimer() }>
+                        删除
+                    </AtActionSheetItem>
+                    <AtActionSheetItem onClick={ () => this.editSelectTimer() }>
+                        编辑
+                    </AtActionSheetItem>
+                    <AtActionSheetItem onClick={ () => this.posterSelectTimer() }>
+                        海报
+                    </AtActionSheetItem>
+                </AtActionSheet>
             </View>
         )
     }
