@@ -26,6 +26,7 @@ export default class Index extends Component {
             showSheet: false,
             selectTimer: {},
             isAuthorize: false,
+            timerRecordList: [],
         }
     }
 
@@ -38,9 +39,35 @@ export default class Index extends Component {
                 this.setState({
                     isAuthorize: true,
                 })
+                Taro.cloud.callFunction({
+                    name: 'getTimerList',
+                    data: {}
+                }).then((res) => {
+                    console.log('获取列表成功', res)
+                    this.setState({
+                        timerRecordList: res.result,
+                    })
+                }).catch(err => {
+                    console.log('获取列表失败', err)
+                })
             } else {
                 console.log('未授权', err)
             }
+        })
+
+        Taro.eventCenter.on('Publish.complete', () => {
+            console.log('完成修改 我要刷新列表')
+            Taro.cloud.callFunction({
+                name: 'getTimerList',
+                data: {}
+            }).then((res) => {
+                console.log('获取列表成功', res)
+                this.setState({
+                    timerRecordList: res.result,
+                })
+            }).catch(err => {
+                console.log('获取列表失败', err)
+            })
         })
     }
 
@@ -94,10 +121,9 @@ export default class Index extends Component {
         this.setState({
             showSheet: false,
         }, () => {
-            Taro.showToast({
-                title: 'editSelectTimer',
-                icon: 'none',
-                duration: 2000
+            const {_id} = this.state.selectTimer
+            Taro.navigateTo({
+                url: `/pages/publish/index?_id=${_id}`
             })
         })
     }
@@ -116,7 +142,7 @@ export default class Index extends Component {
 
     render() {
 
-        const { isAuthorize } = this.state;
+        const { isAuthorize, timerRecordList } = this.state;
         const { screenWidth, screenHeight, windowHeight, statusBarHeight } = Taro.getSystemInfoSync()
 
         console.log(screenHeight, windowHeight)
@@ -131,32 +157,20 @@ export default class Index extends Component {
                     <View style={{ height: Taro.pxTransform(20) }}></View>
                     { !isAuthorize && <Guide></Guide> }
                     { !!isAuthorize &&
-                        [1,2,3].map((item, index) => {
+                        timerRecordList.map((item, index) => {
+                            let startTime = Date.parse(new Date());
+                            let endTime = Date.parse(new Date(`${item.dateSel} ${item.timeSel}`))
+                            
                             return (
-                                <View key={index}>
+                                <View key={item._id}>
                                     <TimeListItem
-                                        title={'黄色表示倒计时'}
-                                        startTime={Date.parse(new Date())}
-                                        endTime={Date.parse(new Date(2020, 0, 1))}
-                                    ></TimeListItem>
-                                    <View style={{ height: Taro.pxTransform(20) }}></View>
-                                    <TimeListItem
-                                        title={'红色表示倒计时已超出'}
-                                        startTime={Date.parse(new Date())}
-                                        endTime={Date.parse(new Date(2019, 10 - 1, 1))}
+                                        title={item.title}
+                                        dateSel={item.dateSel}
+                                        timeSel={item.timeSel}
+                                        startTime={endTime}
+                                        endTime={endTime}
+                                        isCountDown={item.isCountDown}
                                         onLongPress={ () => this.onLongPressTimer(item) }
-                                    ></TimeListItem>
-                                    <View style={{ height: Taro.pxTransform(20) }}></View>
-                                    <TimeListItem
-                                        isCountDown={false}
-                                        title={'绿色表示正计时'}
-                                        startTime={Date.parse(new Date(2019, 0, 1))}
-                                    ></TimeListItem>
-                                    <View style={{ height: Taro.pxTransform(20) }}></View>
-                                    <TimeListItem
-                                        isCountDown={false}
-                                        title={'长按选择编辑和删除'}
-                                        startTime={Date.parse(new Date(2019, 0, 1))}
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
                                 </View>

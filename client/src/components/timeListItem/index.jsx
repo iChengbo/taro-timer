@@ -15,17 +15,23 @@ const BgColors = {
 export default class TimeListItem extends Component {
     constructor(props) {
         super(props)
-        let seconds = props.isCountDown? (props.endTime - props.startTime) / 1000 : (Date.parse(new Date()) - props.startTime) / 1000
+        let goalSeconds = Date.parse(new Date(`${props.dateSel} ${props.timeSel}`)) / 1000
+        let seconds = props.isCountDown? goalSeconds : (Date.parse(new Date())/ 1000 - goalSeconds)
         this.state = {
             timer: null,
+            goalSeconds: goalSeconds,
             seconds: seconds,
-            timeDistance: (Date.parse(new Date()) - props.startTime) / 1000,
+            timeDistance: Date.parse(new Date())/1000 - goalSeconds,
             isTimeOut: false,
             _day: '0',
             _hours: '00',
             _minutes: '00',
             _seconds: '00',
         }
+    }
+
+    componentDidMount() {
+        console.log(9999, this.state.goalSeconds, Date.parse(new Date())/1000 - this.state.goalSeconds)
     }
 
     clearTimer() {
@@ -38,7 +44,8 @@ export default class TimeListItem extends Component {
     }
 
     // 正计时
-    countUp(startTime = this.props.startTime) {
+    countUp(startTime = this.state.goalSeconds) {
+
         const { day, hours, minutes, seconds } = calculateTime(this.state.seconds)
         this.setState({
             _day: day,
@@ -48,7 +55,8 @@ export default class TimeListItem extends Component {
         })
 
         // 
-        const countSeconds = (Date.parse(new Date()) - startTime) / 1000
+        const countSeconds = Date.parse(new Date()) / 1000 - startTime;
+        // console.log(Date.parse(new Date()) / 1000, startTime, countSeconds )
         this.setState({
             seconds: countSeconds
         })
@@ -63,17 +71,21 @@ export default class TimeListItem extends Component {
 
     // 倒计时
     countDown() {
+        console.log(9999, this.state.goalSeconds, Date.parse(new Date())/1000 - this.state.goalSeconds)
+
         const { day, hours, minutes, seconds } = calculateTime(this.state.seconds)
+        // console.log(this.state.seconds, '计算后', day, hours, minutes, seconds)
         this.setState({
             _day: day,
             _hours: hours,
             _minutes: minutes,
             _seconds: seconds
         })
+        const { goalSeconds, timeDistance } = this.state;
         // 注意：通过时间差从而时刻校准计时
-        const countSeconds = this.props.endTime/1000 - (Date.parse(new Date())/1000 - this.state.timeDistance)
+        const countSeconds = goalSeconds - (Date.parse(new Date())/1000)
         // const countSeconds = this.state.seconds - 1
-        // console.log(9999, Date.parse(new Date())/1000 - this.state.timeDistance)
+        // console.log('校准', goalSeconds, Date.parse(new Date())/1000, timeDistance,Date.parse(new Date())/1000 - timeDistance , countSeconds)
         this.setState({
             seconds: countSeconds
         })
@@ -81,13 +93,13 @@ export default class TimeListItem extends Component {
         if (countSeconds < 0) {
             this.clearTimer()
             this.props.onCountEnd && this.props.onCountEnd()
-            let overSeconds = (Date.parse(new Date()) - this.props.endTime) / 1000
-            console.log(Date.parse(new Date()), this.props.endTime, overSeconds)
+            let overSeconds = Date.parse(new Date()) / 1000 - goalSeconds
+            console.log(Date.parse(new Date()), goalSeconds, overSeconds)
             this.setState({
                 seconds: overSeconds,
                 isTimeOut: true,
             }, () => {
-                this.countUp(this.props.endTime)
+                this.countUp(goalSeconds)
             })
             return
         }
@@ -100,8 +112,6 @@ export default class TimeListItem extends Component {
         })
     }
 
-    componentWillMount() { }
-
     componentDidMount() {
         this.props.isCountDown? this.countDown() : this.countUp()
     }
@@ -109,10 +119,6 @@ export default class TimeListItem extends Component {
     componentWillUnmount() {
         clearTimeout(this.state.timer)
     }
-
-    componentDidShow() { }
-
-    componentDidHide() { }
     
     onClick() {
         this.props.onClick && this.props.onClick()
@@ -123,7 +129,7 @@ export default class TimeListItem extends Component {
 
     render() {
         const { _day, _hours, _minutes, _seconds, isTimeOut } = this.state
-        const { title, isCountDown } = this.props
+        const { title, dateSel, timeSel, isCountDown } = this.props
 
         let bgColor = '#292b2e'
         if(!isCountDown) {
@@ -155,7 +161,7 @@ export default class TimeListItem extends Component {
                     </View>
                 </View>
                 <View className='sndLineWrap'>
-                    <Text className='timeGoal'>2019.10.12 00:00 星期六</Text>
+                    <Text className='timeGoal'>{`${dateSel} ${timeSel}`}</Text>
                 </View>
                 {/* <View className='progressWrap'>
                     <AtProgress percent={50} strokeWidth={4} status='progress' isHidePercent></AtProgress>
@@ -172,6 +178,8 @@ TimeListItem.defaultProps = {
 TimeListItem.propTypes = {
     isCountDown: PropTypes.bool,
     title: PropTypes.string,
+    dateSel: PropTypes.string,
+    timeSel: PropTypes.string,
     startTime: PropTypes.number,
     endTime: PropTypes.number,
     onCountEnd: PropTypes.func,

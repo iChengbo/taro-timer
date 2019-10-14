@@ -1,5 +1,5 @@
 import Taro, { Component } from '@tarojs/taro'
-import { View, Text, Input, Picker } from '@tarojs/components'
+import { View, Text, Input, Picker, Button } from '@tarojs/components'
 
 import { AtInput, AtSwitch, AtButton, AtRadio } from 'taro-ui'
 
@@ -13,7 +13,7 @@ export default class PagePicker extends Component {
 
     constructor(props) {
         super(props);
-        const {year, month, day, hours, minutes} = getTimeInfo();
+        const { year, month, day, hours, minutes } = getTimeInfo();
         this.state = {
             title: '',
             dateSel: `${year}-${month}-${day}`,
@@ -23,10 +23,61 @@ export default class PagePicker extends Component {
         }
     }
 
-    handleSave() {
-        const { title, dateSel, timeSel, isTop } = this.state;
-        console.log(title, dateSel, timeSel, isTop, new Date())
+    componentDidMount() {
+        const { _id } = this.$router.params;
+        console.log('_id', _id);
+        !!_id && Taro.cloud.callFunction({
+            name: 'getTimerById',
+            data: {
+                _id,
+            }
+        }).then(res => {
+            const { title, dateSel, timeSel, isCountDown, isTop } = res.result;
+            console.log('获取时间事件成功', res)
+            this.setState({
+                title,
+                dateSel,
+                timeSel,
+                isCountDown,
+                isTop
+            })
+        }).catch(err => {
+            console.log('获取时间事件失败', err)
+        })
+    }
 
+    handleSave() {
+        const { _id } = this.$router.params;
+        const { title, dateSel, timeSel, isCountDown, isTop } = this.state;
+        console.log(1111, _id, title, dateSel, timeSel, isCountDown, isTop)
+        const params = !!_id ? {
+            _id,
+            title,
+            dateSel,
+            timeSel,
+            isCountDown,
+            isTop
+        } : {
+                title,
+                dateSel,
+                timeSel,
+                isCountDown,
+                isTop
+            }
+        Taro.cloud.callFunction({
+            name: 'postTimer',
+            data: params,
+        }).then((res) => {
+            if (res.result.code != 500) {
+                console.log('存储成功', res)
+                Taro.eventCenter.trigger('Publish.complete')
+                Taro.navigateBack()
+            } else {
+                console.log('存储失败', res)
+            }
+        }).catch(err => {
+            console.log('存储失败', err)
+        })
     }
 
     handleChange(title) {
@@ -61,20 +112,19 @@ export default class PagePicker extends Component {
             isCountDown: isChecked
         })
     }
-    handleChangeRadio = e => {
-        console.log(99, e)
-    }
 
     render() {
         const { isCountDown } = this.state;
+        const { screenWidth } = Taro.getSystemInfo()
+
         return (
             <View className='container'>
                 <View className='slctTimer'>
-                    <View className='slctTimer-btn'>
-                        <AtButton full={false} size='small' circle={true} type={isCountDown? 'secondary': 'primary'} onClick={ () => this.onIsCountDownChange(false) }>正计时</AtButton>
+                    <View className='slctTimer-btn' style={{ width: Taro.pxTransform(screenWidth / 2) }}>
+                        <AtButton full={false} size='small' circle={true} type={isCountDown ? 'secondary' : 'primary'} onClick={() => this.onIsCountDownChange(false)}>正计时</AtButton>
                     </View>
                     <View className='slctTimer-btn'>
-                        <AtButton full={false} size='small' circle={true} type={isCountDown? 'primary': 'secondary'} onClick={ () => this.onIsCountDownChange(true) }>倒计时</AtButton>
+                        <AtButton full={false} size='small' circle={true} type={isCountDown ? 'primary' : 'secondary'} onClick={() => this.onIsCountDownChange(true)}>倒计时</AtButton>
                     </View>
                 </View>
                 <AtInput
@@ -82,7 +132,7 @@ export default class PagePicker extends Component {
                     title='标题'
                     type='text'
                     placeholder='标准五个字'
-                    value={this.state.value}
+                    value={this.state.title}
                     onChange={this.handleChange.bind(this)}
                 />
                 <View className='page-body'>
@@ -116,11 +166,10 @@ export default class PagePicker extends Component {
                             </Picker>
                         </View>
                     </View>
-                    {/* <AtSwitch title='倒计时' checked={this.state.isCountDown} onChange={ (value) => this.onIsCountDownChange(value) }/> */}
-                    <AtSwitch title='置顶' onChange={ (value) => this.onIsTopChange(value) }/>
+                    <AtSwitch title='置顶' onChange={(value) => this.onIsTopChange(value)} />
                 </View>
                 <View className='save-btn'>
-                    <AtButton type='primary' circle={true} onClick={ () => this.handleSave() }>保存</AtButton>
+                    <AtButton type='primary' disabled={!this.state.title} circle={true} onClick={() => this.handleSave()}>保存</AtButton>
                 </View>
             </View>
         )
