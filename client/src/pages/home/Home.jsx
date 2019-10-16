@@ -12,7 +12,7 @@ import './Home.scss'
 export default class Index extends Component {
 
     config = {
-        navigationBarTitleText: '时间节点',
+        navigationBarTitleText: '时间点',
         // navigationBarBackgroundColor: '#292b2e',
         // navigationBarBackgroundColor: '#6190E8',
         // navigationBarTextStyle: 'white',
