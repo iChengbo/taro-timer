@@ -2,9 +2,7 @@ import Taro, { Component } from "@tarojs/taro"
 import { View, Text, Button } from "@tarojs/components"
 import PropTypes from 'prop-types'
 
-import { AtTag, AtProgress } from 'taro-ui'
-
-import { calculateTime } from '../../utils/timeFunctions'
+import { calculateTime, transformTime } from '../../utils/timeFunctions'
 import './index.scss'
 import { COLOR } from '../../constants/colors'
 
@@ -14,9 +12,9 @@ const BgColors = {
 
 export default class TimeListItem extends Component {
     constructor(props) {
-        super(props)
-        let goalSeconds = Date.parse(new Date(`${props.dateSel} ${props.timeSel}`)) / 1000
-        let seconds = props.isCountDown? goalSeconds : (Date.parse(new Date())/ 1000 - goalSeconds)
+        super(props);
+        let goalSeconds = transformTime(props.dateSel, props.timeSel) / 1000;
+        let seconds = props.isCountDown? goalSeconds : (Date.parse(new Date())/ 1000 - goalSeconds);
         this.state = {
             timer: null,
             goalSeconds: goalSeconds,
@@ -30,8 +28,9 @@ export default class TimeListItem extends Component {
         }
     }
 
+    componentWillMount() {}
     componentDidMount() {
-        console.log(9999, this.state.goalSeconds, Date.parse(new Date())/1000 - this.state.goalSeconds)
+        // 组件 此生命周期无用
     }
 
     clearTimer() {
@@ -71,7 +70,7 @@ export default class TimeListItem extends Component {
 
     // 倒计时
     countDown() {
-        console.log(9999, this.state.goalSeconds, Date.parse(new Date())/1000 - this.state.goalSeconds)
+        // console.log(9999, new Date(this.state.goalSeconds*1000), this.state.goalSeconds, this.state.goalSeconds - Date.parse(new Date())/1000 )
 
         const { day, hours, minutes, seconds } = calculateTime(this.state.seconds)
         // console.log(this.state.seconds, '计算后', day, hours, minutes, seconds)
@@ -83,7 +82,7 @@ export default class TimeListItem extends Component {
         })
         const { goalSeconds, timeDistance } = this.state;
         // 注意：通过时间差从而时刻校准计时
-        const countSeconds = goalSeconds - (Date.parse(new Date())/1000)
+        const countSeconds = goalSeconds - +(new Date())/1000
         // const countSeconds = this.state.seconds - 1
         // console.log('校准', goalSeconds, Date.parse(new Date())/1000, timeDistance,Date.parse(new Date())/1000 - timeDistance , countSeconds)
         this.setState({
@@ -93,8 +92,8 @@ export default class TimeListItem extends Component {
         if (countSeconds < 0) {
             this.clearTimer()
             this.props.onCountEnd && this.props.onCountEnd()
-            let overSeconds = Date.parse(new Date()) / 1000 - goalSeconds
-            console.log(Date.parse(new Date()), goalSeconds, overSeconds)
+            let overSeconds = +(new Date()) / 1000 - goalSeconds
+            // console.log('fuck 到点了', +(new Date()), goalSeconds, overSeconds)
             this.setState({
                 seconds: overSeconds,
                 isTimeOut: true,
@@ -118,6 +117,12 @@ export default class TimeListItem extends Component {
 
     componentWillUnmount() {
         clearTimeout(this.state.timer)
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if(this.props.isCountDown !== nextProps.isCountDown) {
+            return true;
+        }
     }
     
     onClick() {
@@ -149,7 +154,7 @@ export default class TimeListItem extends Component {
                         <Text className='fstLeftWrap-text'>{title}</Text>
                     </View>
                     <View className='fstRightWrap'>
-                        {!!isTimeOut && <Text className='timeFormat' style={{color: bgColor}}>超出</Text> }
+                        {!!isCountDown && !!isTimeOut && <Text className='timeFormat' style={{color: bgColor}}>超出</Text> }
                         {!!_day && <Text className='timeNumber_day'>{_day}</Text>}
                         {!!_day && <Text className='timeFormat'>天</Text>}
                         <Text className='timeNumber'>{_hours}</Text>
@@ -163,9 +168,6 @@ export default class TimeListItem extends Component {
                 <View className='sndLineWrap'>
                     <Text className='timeGoal'>{`${dateSel} ${timeSel}`}</Text>
                 </View>
-                {/* <View className='progressWrap'>
-                    <AtProgress percent={50} strokeWidth={4} status='progress' isHidePercent></AtProgress>
-                </View> */}
             </View>
         )
     }

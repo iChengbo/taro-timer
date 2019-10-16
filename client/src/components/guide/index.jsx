@@ -5,6 +5,7 @@ import PropTypes from 'prop-types'
 import TimeListItem from '../timeListItem'
 
 import './index.scss'
+import { AtButton } from 'taro-ui'
 
 export default class Guide extends Component {
 
@@ -57,7 +58,8 @@ export default class Guide extends Component {
 
         console.log(screenHeight, windowHeight)
         return (
-            <View>
+            <View className='container' style={{marginTop: 0}}>
+                {/* <AtButton type="primary">这里空空如也,点此开始吧</AtButton> */}
                 <TimeListItem
                     title={'黄色表示倒计时'}
                     startTime={Date.parse(new Date())}
@@ -83,10 +85,11 @@ export default class Guide extends Component {
                     startTime={Date.parse(new Date(2019, 0, 1))}
                 ></TimeListItem>
                 <View style={{ height: Taro.pxTransform(20) }}></View>
-                <Button
+                <AtButton
+                    type="primary"
                     openType="getUserInfo"
                     onGetUserInfo={(e) => this.onGotUserInfo(e) }
-                >我知道了</Button>
+                >我知道了</AtButton>
             </View>
         )
     }

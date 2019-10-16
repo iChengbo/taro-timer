@@ -7,7 +7,7 @@ import Guide from '../../components/guide'
 
 import { AtFab, AtActionSheet, AtActionSheetItem } from 'taro-ui'
 
-import './index.scss'
+import './Home.scss'
 
 export default class Index extends Component {
 
@@ -77,6 +77,12 @@ export default class Index extends Component {
 
     componentDidHide() { }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        if(this.props.isAuthorize !== nextProps.isAuthorize) {
+            return true;
+        }
+    }
+
     onTimeUp() {
         Taro.showToast({
             title: '时间到',
@@ -87,7 +93,7 @@ export default class Index extends Component {
 
     handleClickAdd(item, index) {
         Taro.navigateTo({
-            url: '/pages/publish/index'
+            url: '/pages/publish/Publish'
         })
     }
 
@@ -109,10 +115,13 @@ export default class Index extends Component {
         this.setState({
             showSheet: false,
         }, () => {
-            Taro.showToast({
-                title: 'deleteSelectTimer',
-                icon: 'none',
-                duration: 2000
+            const { _id } = this.state.selectTimer;
+            Taro.cloud.callFunction({
+                name: 'deleteTimerById',
+                data: {_id}
+            }).then(res => {
+                console.log('删除成功', res);
+                Taro.eventCenter.trigger('Publish.complete')
             })
         })
     }
@@ -121,9 +130,9 @@ export default class Index extends Component {
         this.setState({
             showSheet: false,
         }, () => {
-            const {_id} = this.state.selectTimer
+            const { _id } = this.state.selectTimer
             Taro.navigateTo({
-                url: `/pages/publish/index?_id=${_id}`
+                url: `/pages/publish/Publish?_id=${_id}`
             })
         })
     }
@@ -147,8 +156,8 @@ export default class Index extends Component {
 
         console.log(screenHeight, windowHeight)
         return (
-            <View className='index'>
-                <View className='index__fab'>
+            <View className='container'>
+                <View className='index__fab' style={{left: Taro.pxTransform(screenWidth-100)}}>
                     <AtFab onClick={() => this.handleClickAdd()}>
                         <Text className='at-fab__icon at-icon at-icon-add'></Text>
                     </AtFab>
@@ -158,17 +167,12 @@ export default class Index extends Component {
                     { !isAuthorize && <Guide></Guide> }
                     { !!isAuthorize &&
                         timerRecordList.map((item, index) => {
-                            let startTime = Date.parse(new Date());
-                            let endTime = Date.parse(new Date(`${item.dateSel} ${item.timeSel}`))
-                            
                             return (
                                 <View key={item._id}>
                                     <TimeListItem
                                         title={item.title}
                                         dateSel={item.dateSel}
                                         timeSel={item.timeSel}
-                                        startTime={endTime}
-                                        endTime={endTime}
                                         isCountDown={item.isCountDown}
                                         onLongPress={ () => this.onLongPressTimer(item) }
                                     ></TimeListItem>
@@ -185,9 +189,9 @@ export default class Index extends Component {
                     <AtActionSheetItem onClick={ () => this.editSelectTimer() }>
                         编辑
                     </AtActionSheetItem>
-                    <AtActionSheetItem onClick={ () => this.posterSelectTimer() }>
+                    {/* <AtActionSheetItem onClick={ () => this.posterSelectTimer() }>
                         海报
-                    </AtActionSheetItem>
+                    </AtActionSheetItem> */}
                 </AtActionSheet>
             </View>
         )

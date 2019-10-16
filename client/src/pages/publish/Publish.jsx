@@ -1,9 +1,11 @@
 import Taro, { Component } from '@tarojs/taro'
 import { View, Text, Input, Picker, Button } from '@tarojs/components'
 
-import { AtInput, AtSwitch, AtButton, AtRadio } from 'taro-ui'
+import { AtInput, AtSwitch, AtButton, AtActivityIndicator } from 'taro-ui'
 
 import { getTimeInfo } from '../../utils/timeFunctions';
+
+import './Publish.scss';
 
 export default class PagePicker extends Component {
 
@@ -20,30 +22,45 @@ export default class PagePicker extends Component {
             timeSel: `${hours}:${minutes}`,
             isCountDown: true,
             isTop: false,
+            loading: true,
         }
     }
 
     componentDidMount() {
         const { _id } = this.$router.params;
         console.log('_id', _id);
-        !!_id && Taro.cloud.callFunction({
-            name: 'getTimerById',
-            data: {
-                _id,
-            }
-        }).then(res => {
-            const { title, dateSel, timeSel, isCountDown, isTop } = res.result;
-            console.log('获取时间事件成功', res)
-            this.setState({
-                title,
-                dateSel,
-                timeSel,
-                isCountDown,
-                isTop
+        if(!!_id) {
+            Taro.cloud.callFunction({
+                name: 'getTimerById',
+                data: {
+                    _id,
+                }
+            }).then(res => {
+                const { title, dateSel, timeSel, isCountDown, isTop } = res.result;
+                console.log('获取时间事件成功', res)
+                this.setState({
+                    title,
+                    dateSel,
+                    timeSel,
+                    isCountDown,
+                    isTop,
+                    loading: false,
+                })
+            }).catch(err => {
+                console.log('获取时间事件失败', err)
+                this.setState({
+                    loading: false,
+                })
+                Taro.showToast({
+                    title: '获取数据失败',
+                    icon: 'loading'
+                })
             })
-        }).catch(err => {
-            console.log('获取时间事件失败', err)
-        })
+        } else {
+            this.setState({
+                loading: false,
+            })
+        }
     }
 
     handleSave() {
@@ -115,23 +132,27 @@ export default class PagePicker extends Component {
 
     render() {
         const { isCountDown } = this.state;
-        const { screenWidth } = Taro.getSystemInfo()
+        const { screenWidth, windowHeight } = Taro.getSystemInfo()
+
+        if(this.state.loading) {
+            return (
+                <View className='container'>
+                <AtActivityIndicator mode='center' size={96} content='努力加载中...'></AtActivityIndicator>
+                </View>
+            )
+        }
 
         return (
             <View className='container'>
                 <View className='slctTimer'>
-                    <View className='slctTimer-btn' style={{ width: Taro.pxTransform(screenWidth / 2) }}>
-                        <AtButton full={false} size='small' circle={true} type={isCountDown ? 'secondary' : 'primary'} onClick={() => this.onIsCountDownChange(false)}>正计时</AtButton>
-                    </View>
-                    <View className='slctTimer-btn'>
-                        <AtButton full={false} size='small' circle={true} type={isCountDown ? 'primary' : 'secondary'} onClick={() => this.onIsCountDownChange(true)}>倒计时</AtButton>
-                    </View>
+                    <AtButton full={false} size='small' circle={true} type={isCountDown ? 'secondary' : 'primary'} onClick={() => this.onIsCountDownChange(false)}>正计时</AtButton>
+                    <AtButton full={false} size='small' circle={true} type={isCountDown ? 'primary' : 'secondary'} onClick={() => this.onIsCountDownChange(true)}>倒计时</AtButton>
                 </View>
                 <AtInput
                     name='value'
                     title='标题'
                     type='text'
-                    placeholder='标准五个字'
+                    placeholder='请输入事件标题'
                     value={this.state.title}
                     onChange={this.handleChange.bind(this)}
                 />
@@ -144,7 +165,6 @@ export default class PagePicker extends Component {
                                     title='日期'
                                     type='text'
                                     editable={false}
-                                    placeholder='标准五个字'
                                     value={this.state.dateSel}
                                 />
                             </Picker>
@@ -159,7 +179,6 @@ export default class PagePicker extends Component {
                                         title='时间'
                                         type='text'
                                         editable={false}
-                                        placeholder='标准五个字'
                                         value={this.state.timeSel}
                                     />
                                 </View>

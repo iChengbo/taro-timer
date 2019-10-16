@@ -1,12 +1,11 @@
 .index{
     position: relative;
     height: '100%';
+    width: '100%';
     overflow: hidden;
     &__fab{
         position: fixed;
         bottom: 0px;
-        left: 0;
-        bottom: 0;
         z-index: 10;
     }
     &__header{

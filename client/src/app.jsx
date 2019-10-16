@@ -1,5 +1,5 @@
 import Taro, { Component } from '@tarojs/taro'
-import Index from './pages/home/index'
+import Index from './pages/home/Home'
 
 import './app.scss'
 import 'taro-ui/dist/style/index.scss'
@@ -14,10 +14,11 @@ class App extends Component {
 
   config = {
     pages: [
-      'pages/home/index',
-      'pages/publish/index',
-      'pages/user/index',
+      'pages/home/Home',
+      'pages/publish/Publish',
+      'pages/user/User',
       'pages/poster/index',
+      'pages/user/feedBack/FeedBack',
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -28,12 +29,12 @@ class App extends Component {
     cloud: true,
     tabBar: {
       list: [{
-        pagePath: "pages/home/index",
+        pagePath: "pages/home/Home",
         text: "首页",
         iconPath: "./images/tab-bar/home.png",
         selectedIconPath: "./images/tab-bar/home-active.png"
       }, {
-        pagePath: "pages/user/index",
+        pagePath: "pages/user/User",
         text: "我的",
         iconPath: "./images/tab-bar/user.png",
         selectedIconPath: "./images/tab-bar/user-active.png"

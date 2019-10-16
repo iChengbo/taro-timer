@@ -9,6 +9,8 @@ exports.main = async (event, context) => {
     const { OPENID } = cloud.getWXContext()
     console.log('event---', event);
 
+    console.log('测试时间', new Date(), +new Date(), new Date('2019', '1', '1'), new Date(2019, 1,1), new Date(2019, 1, 1))
+
     try {
         const timerRecordList = (await timerCollection.where({
             openId: OPENID,

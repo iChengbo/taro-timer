@@ -2,17 +2,11 @@ import Taro, { Component, Config } from '@tarojs/taro'
 import {
     ScrollView,
     View,
-    Button,
-    Text,
-    Image,
 } from '@tarojs/components';
 
 import { AtAvatar, AtButton, AtList, AtListItem } from "taro-ui";
-import Login from '../../components/login/index'
 
-import { USER } from '../../constants/screens';
-
-import './index.scss';
+import './User.scss';
 
 export default class User extends Component {
     config = {
@@ -26,16 +20,13 @@ export default class User extends Component {
         }
     }
 
-    handleClickListItem(screen, params) {
-        Taro.showToast({
-            title: '该页面还未完成，敬请期待',
-            icon: 'none',
-            duration: 2000
+    handleClickListItem(pathAndParams) {
+        Taro.navigateTo({
+            url: pathAndParams,
         })
     }
 
     render() {
-        let { userInfo } = this.state 
         return (
             <View className='user'>
                 <View className='user__header'>
@@ -43,22 +34,21 @@ export default class User extends Component {
                 </View>
                 <View style={{ height: Taro.pxTransform(20) }}></View>
                 <AtList hasBorder={false}>
-                    <AtListItem
-                        onClick={() => this.handleClickListItem()}
-                        title='用户反馈'
-                        arrow='right'
-                        iconInfo={{ size: 25, color: '#000', value: 'message' }}
-                    />
-                    <AtListItem
+                    {/* <AtListItem
                         onClick={() => this.handleClickListItem()}
                         title='关于我们'
                         arrow='right'
                         iconInfo={{ size: 25, color: '#000', value: 'tag' }}
+                    /> */}
+                    <AtListItem
+                        onClick={() => this.handleClickListItem('/pages/user/feedBack/FeedBack')}
+                        title='帮助与反馈'
+                        arrow='right'
+                        iconInfo={{ size: 25, color: '#000', value: 'message' }}
                     />
                 </AtList>
                 <View className='user__footer'>
                     {/* <Text>底部</Text> */}
-                    <Login></Login>
                 </View>
             </View>
         )
