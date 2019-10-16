@@ -78,7 +78,7 @@ export default class Index extends Component {
     componentDidHide() { }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if(this.props.isAuthorize !== nextProps.isAuthorize) {
+        if(this.state.isAuthorize !== nextState.isAuthorize) {
             return true;
         }
     }
