@@ -151,7 +151,7 @@ export default class Index extends Component {
 
     render() {
 
-        const { isAuthorize, timerRecordList } = this.state;
+        const { isAuthorize, timerRecordList=[] } = this.state;
         const { screenWidth, screenHeight, windowHeight, statusBarHeight } = Taro.getSystemInfoSync()
 
         console.log(screenHeight, windowHeight)
