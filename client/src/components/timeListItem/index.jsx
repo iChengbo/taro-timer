@@ -29,8 +29,19 @@ export default class TimeListItem extends Component {
     }
 
     componentWillMount() {}
+ 
     componentDidMount() {
-        // 组件 此生命周期无用
+        this.props.isCountDown? this.countDown() : this.countUp()
+    }
+
+    componentWillUnmount() {
+        clearTimeout(this.state.timer)
+    }
+
+    shouldComponentUpdate(nextProps, nextState) {
+        if(this.props.isCountDown !== nextProps.isCountDown) {
+            return true;
+        }
     }
 
     clearTimer() {
@@ -109,20 +120,6 @@ export default class TimeListItem extends Component {
         this.setState({
             timer: t
         })
-    }
-
-    componentDidMount() {
-        this.props.isCountDown? this.countDown() : this.countUp()
-    }
-
-    componentWillUnmount() {
-        clearTimeout(this.state.timer)
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        if(this.props.isCountDown !== nextProps.isCountDown) {
-            return true;
-        }
     }
     
     onClick() {

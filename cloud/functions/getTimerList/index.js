@@ -6,7 +6,12 @@ const timerCollection = db.collection("timer");
 
 // 云函数入口函数
 exports.main = async (event, context) => {
-    const { OPENID } = cloud.getWXContext()
+    const { ENV, OPENID } = cloud.getWXContext()
+    // 更新默认配置，将默认访问环境设为当前云函数所在环境
+    cloud.updateConfig({
+        env: ENV
+    })
+    console.log('eeeeee', ENV, cloud.DYNAMIC_CURRENT_ENV)
     console.log('event---', event);
 
     console.log('测试时间', new Date(), +new Date(), new Date('2019', '1', '1'), new Date(2019, 1,1), new Date(2019, 1, 1))

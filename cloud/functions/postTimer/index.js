@@ -6,7 +6,11 @@ const timerCollection = db.collection("timer");
 
 // 云函数入口函数
 exports.main = async (event, context) => {
-    const { OPENID } = cloud.getWXContext()
+    const { ENV, OPENID } = cloud.getWXContext()
+    // 更新默认配置，将默认访问环境设为当前云函数所在环境
+    cloud.updateConfig({
+        env: ENV
+    })
     const { _id, title, dateSel, timeSel, isCountDown, isTop } = event;
     console.log('event---', _id, OPENID, event);
 

@@ -33,6 +33,9 @@ export default class Guide extends Component {
             Taro.cloud
                 .callFunction({
                     name: 'postUserInfo',
+                    config: {
+                        env: process.env.NODE_ENV
+                    },
                     data: {
                         name: nickName,
                         gender: gender,

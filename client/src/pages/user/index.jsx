@@ -4,9 +4,9 @@ import {
     View,
 } from '@tarojs/components';
 
-import { AtAvatar, AtButton, AtList, AtListItem } from "taro-ui";
+import { AtAvatar, AtFab, AtList, AtListItem } from "taro-ui";
 
-import './User.scss';
+import './index.scss';
 
 export default class User extends Component {
     config = {
@@ -29,6 +29,12 @@ export default class User extends Component {
     render() {
         return (
             <View className='user'>
+                {/* <View className='user__fab'>
+                    <Button openType={'share'}>分享</Button>
+                    <AtFab openType='share'>
+                        <Text className='at-fab__icon at-icon at-icon-add'></Text>
+                    </AtFab>
+                </View> */}
                 <View className='user__header'>
                     <AtAvatar openData={{ type: 'userAvatarUrl' }} size='large' circle={true}></AtAvatar>
                 </View>
@@ -41,7 +47,7 @@ export default class User extends Component {
                         iconInfo={{ size: 25, color: '#000', value: 'tag' }}
                     /> */}
                     <AtListItem
-                        onClick={() => this.handleClickListItem('/pages/user/feedBack/FeedBack')}
+                        onClick={() => this.handleClickListItem('/pages/user/feedBack/index')}
                         title='帮助与反馈'
                         arrow='right'
                         iconInfo={{ size: 25, color: '#000', value: 'message' }}

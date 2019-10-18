@@ -4,11 +4,11 @@ import {
     View,
 } from '@tarojs/components';
 
-import { AtCard, AtButton, AtList, AtListItem } from "taro-ui";
+import { AtCard, AtButton } from "taro-ui";
 
-import './FeedBack.scss';
+import './index.scss';
 
-export default class User extends Component {
+export default class FeedBack extends Component {
     config = {
         navigationBarTitleText: '帮助与反馈'
     }

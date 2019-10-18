@@ -14,6 +14,7 @@
 		"coverView": true,
 		"nodeModules": false,
 		"autoAudits": false,
+		"uglifyFileName": false,
 		"checkInvalidKey": true,
 		"checkSiteMap": true,
 		"uploadWithSourceMap": true,
@@ -21,7 +22,8 @@
 			"ignore": [],
 			"disablePlugins": [],
 			"outputPath": ""
-		}
+		},
+		"bundle": false
 	},
 	"compileType": "miniprogram",
 	"simulatorType": "wechat",

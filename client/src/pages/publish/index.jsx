@@ -4,10 +4,11 @@ import { View, Text, Input, Picker, Button } from '@tarojs/components'
 import { AtInput, AtSwitch, AtButton, AtActivityIndicator } from 'taro-ui'
 
 import { getTimeInfo } from '../../utils/timeFunctions';
+import { postTimer } from '../../apis/timer';
 
-import './Publish.scss';
+import './index.scss';
 
-export default class PagePicker extends Component {
+export default class Publish extends Component {
 
     config = {
         navigationBarTitleText: '新建',
@@ -29,9 +30,12 @@ export default class PagePicker extends Component {
     componentDidMount() {
         const { _id } = this.$router.params;
         console.log('_id', _id);
-        if(!!_id) {
+        if (!!_id) {
             Taro.cloud.callFunction({
                 name: 'getTimerById',
+                config: {
+                    env: process.env.NODE_ENV
+                },
                 data: {
                     _id,
                 }
@@ -67,7 +71,7 @@ export default class PagePicker extends Component {
         const { _id } = this.$router.params;
         const { title, dateSel, timeSel, isCountDown, isTop } = this.state;
         console.log(1111, _id, title, dateSel, timeSel, isCountDown, isTop)
-        const params = !!_id ? {
+        const data = !!_id ? {
             _id,
             title,
             dateSel,
@@ -80,11 +84,8 @@ export default class PagePicker extends Component {
                 timeSel,
                 isCountDown,
                 isTop
-            }
-        Taro.cloud.callFunction({
-            name: 'postTimer',
-            data: params,
-        }).then((res) => {
+            };
+        postTimer(data).then((res) => {
             if (res.result.code != 500) {
                 console.log('存储成功', res)
                 Taro.eventCenter.trigger('Publish.complete')
@@ -134,10 +135,10 @@ export default class PagePicker extends Component {
         const { isCountDown } = this.state;
         const { screenWidth, windowHeight } = Taro.getSystemInfo()
 
-        if(this.state.loading) {
+        if (this.state.loading) {
             return (
                 <View className='container'>
-                <AtActivityIndicator mode='center' size={96} content='努力加载中...'></AtActivityIndicator>
+                    <AtActivityIndicator mode='center' size={96} content='努力加载中...'></AtActivityIndicator>
                 </View>
             )
         }

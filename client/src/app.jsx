@@ -1,5 +1,5 @@
 import Taro, { Component } from '@tarojs/taro'
-import Index from './pages/home/Home'
+import Index from './pages/home'
 
 import './app.scss'
 import 'taro-ui/dist/style/index.scss'
@@ -14,11 +14,12 @@ class App extends Component {
 
   config = {
     pages: [
-      'pages/home/Home',
-      'pages/publish/Publish',
-      'pages/user/User',
+      'pages/home/index',
+      'pages/login/index',
+      'pages/publish/index',
+      'pages/user/index',
       'pages/poster/index',
-      'pages/user/feedBack/FeedBack',
+      'pages/user/feedBack/index',
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -29,12 +30,12 @@ class App extends Component {
     cloud: true,
     tabBar: {
       list: [{
-        pagePath: "pages/home/Home",
+        pagePath: "pages/home/index",
         text: "首页",
         iconPath: "./images/tab-bar/home.png",
         selectedIconPath: "./images/tab-bar/home-active.png"
       }, {
-        pagePath: "pages/user/User",
+        pagePath: "pages/user/index",
         text: "我的",
         iconPath: "./images/tab-bar/user.png",
         selectedIconPath: "./images/tab-bar/user-active.png"
@@ -45,7 +46,10 @@ class App extends Component {
 
   componentDidMount() {
     if (process.env.TARO_ENV === 'weapp') {
-      Taro.cloud.init()
+      Taro.cloud.init({
+        env: process.env.NODE_ENV,
+        traceUser: true
+      })
     }
   }
 

@@ -9,6 +9,13 @@ export default class Login extends Component {
         }
     }
 
+    componentWillMount() {
+        // console.log('componentWillMount')
+    }
+    componentDidMount() {
+        // console.log('componentDidMount')
+    }
+
     onGotUserInfo(e) {
         console.log(e)
         const { detail } = e

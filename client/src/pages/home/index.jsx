@@ -7,17 +7,12 @@ import Guide from '../../components/guide'
 
 import { AtFab, AtActionSheet, AtActionSheetItem } from 'taro-ui'
 
-import './Home.scss'
+import { getTimerList, deleteTimerById } from '../../apis/timer'
+import { isLoggin } from '../../utils/checker';
 
-export default class Index extends Component {
+import './index.scss'
 
-    config = {
-        navigationBarTitleText: '时间点',
-        // navigationBarBackgroundColor: '#292b2e',
-        // navigationBarBackgroundColor: '#6190E8',
-        // navigationBarTextStyle: 'white',
-        // navigationStyle: 'custom',
-    }
+export default class Home extends Component {
 
     constructor(props) {
         super(props);
@@ -33,26 +28,24 @@ export default class Index extends Component {
     componentWillMount() { }
 
     componentDidMount() {
-        Taro.getSetting().then((res) => {
-            if(!!res.authSetting['scope.userInfo']) {
-                console.log('已授权', res)
+        isLoggin().then((res) => {
+            console.log('已授权', res)
+            this.setState({
+                isAuthorize: true,
+            })
+            getTimerList({}).then((res) => {
+                console.log('获取列表成功', res)
                 this.setState({
-                    isAuthorize: true,
+                    timerRecordList: res.result,
                 })
-                Taro.cloud.callFunction({
-                    name: 'getTimerList',
-                    data: {}
-                }).then((res) => {
-                    console.log('获取列表成功', res)
-                    this.setState({
-                        timerRecordList: res.result,
-                    })
-                }).catch(err => {
-                    console.log('获取列表失败', err)
-                })
-            } else {
-                console.log('未授权', err)
-            }
+            }).catch(err => {
+                console.log('获取列表失败', err)
+            })
+        }).catch((err) => {
+            console.log('未授权', err)
+            Taro.navigateTo({
+                url: '/pages/login/index'
+            })
         })
 
         Taro.eventCenter.on('Publish.complete', () => {
@@ -92,8 +85,14 @@ export default class Index extends Component {
     }
 
     handleClickAdd(item, index) {
-        Taro.navigateTo({
-            url: '/pages/publish/Publish'
+        isLoggin().then((res) => {
+            Taro.navigateTo({
+                url: '/pages/publish/index'
+            })
+        }).catch((err) => {
+            Taro.navigateTo({
+                url: '/pages/login/index'
+            })
         })
     }
 
@@ -116,10 +115,7 @@ export default class Index extends Component {
             showSheet: false,
         }, () => {
             const { _id } = this.state.selectTimer;
-            Taro.cloud.callFunction({
-                name: 'deleteTimerById',
-                data: {_id}
-            }).then(res => {
+            deleteTimerById({_id}).then(res => {
                 console.log('删除成功', res);
                 Taro.eventCenter.trigger('Publish.complete')
             })
@@ -132,7 +128,7 @@ export default class Index extends Component {
         }, () => {
             const { _id } = this.state.selectTimer
             Taro.navigateTo({
-                url: `/pages/publish/Publish?_id=${_id}`
+                url: `/pages/publish/index?_id=${_id}`
             })
         })
     }
@@ -157,14 +153,13 @@ export default class Index extends Component {
         console.log(screenHeight, windowHeight)
         return (
             <View className='container'>
-                <View className='index__fab' style={{left: Taro.pxTransform(screenWidth-100)}}>
+                <View className='index__fab'>
                     <AtFab onClick={() => this.handleClickAdd()}>
                         <Text className='at-fab__icon at-icon at-icon-add'></Text>
                     </AtFab>
                 </View>
                 <View className='index__body' style={{backgroundColor: '#e5e5e5', width: '100%'}}>
                     <View style={{ height: Taro.pxTransform(20) }}></View>
-                    { !isAuthorize && <Guide></Guide> }
                     { !!isAuthorize &&
                         timerRecordList.map((item, index) => {
                             return (
@@ -196,4 +191,8 @@ export default class Index extends Component {
             </View>
         )
     }
+}
+
+Home.config = {
+    navigationBarTitleText: '极时刻',
 }
