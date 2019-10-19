@@ -26,7 +26,7 @@ export const transformTime = (date='2019-10-01', time='10:10') => {
     const dateArr = date.split('-');
     const timeArr = time.split(':');
     const tr = new Date(dateArr[0], dateArr[1] -1, dateArr[2], timeArr[0], timeArr[1]);
-    console.log(123, tr, +tr, Date.parse(tr))
+    // console.log(123, tr, +tr, Date.parse(tr))
     return +tr;
 }
 

@@ -5,7 +5,7 @@ import { AtInput, AtSwitch, AtButton, AtActivityIndicator } from 'taro-ui'
 
 import { getTimeInfo } from '../../utils/timeFunctions';
 import { postTimer } from '../../apis/timer';
-
+import { throttle } from 'lodash';
 import './index.scss';
 
 export default class Publish extends Component {
@@ -24,7 +24,10 @@ export default class Publish extends Component {
             isCountDown: true,
             isTop: false,
             loading: true,
+            isSaving: false,
         }
+
+        this.handleSave = throttle(this.handleSave, 1000);
     }
 
     componentDidMount() {
@@ -70,7 +73,7 @@ export default class Publish extends Component {
     handleSave() {
         const { _id } = this.$router.params;
         const { title, dateSel, timeSel, isCountDown, isTop } = this.state;
-        console.log(1111, _id, title, dateSel, timeSel, isCountDown, isTop)
+        // console.log(1111, _id, title, dateSel, timeSel, isCountDown, isTop)
         const data = !!_id ? {
             _id,
             title,
@@ -85,16 +88,20 @@ export default class Publish extends Component {
                 isCountDown,
                 isTop
             };
-        postTimer(data).then((res) => {
-            if (res.result.code != 500) {
-                console.log('存储成功', res)
-                Taro.eventCenter.trigger('Publish.complete')
-                Taro.navigateBack()
-            } else {
-                console.log('存储失败', res)
-            }
-        }).catch(err => {
-            console.log('存储失败', err)
+        this.setState({
+            isSaving: true,
+        }, () => {
+            postTimer(data).then((res) => {
+                if (res.result.code != 500) {
+                    console.log('存储成功', res)
+                    Taro.eventCenter.trigger('Publish.complete')
+                    Taro.navigateBack()
+                } else {
+                    console.log('存储失败', res)
+                }
+            }).catch(err => {
+                console.log('存储失败', err)
+            })
         })
     }
 
@@ -132,7 +139,7 @@ export default class Publish extends Component {
     }
 
     render() {
-        const { isCountDown } = this.state;
+        const { dateSel, timeSel, isCountDown, title, isSaving } = this.state;
         const { screenWidth, windowHeight } = Taro.getSystemInfo()
 
         if (this.state.loading) {
@@ -154,7 +161,7 @@ export default class Publish extends Component {
                     title='标题'
                     type='text'
                     placeholder='请输入事件标题'
-                    value={this.state.title}
+                    value={title}
                     onChange={this.handleChange.bind(this)}
                 />
                 <View className='page-body'>
@@ -166,7 +173,7 @@ export default class Publish extends Component {
                                     title='日期'
                                     type='text'
                                     editable={false}
-                                    value={this.state.dateSel}
+                                    value={dateSel}
                                 />
                             </Picker>
                         </View>
@@ -180,7 +187,7 @@ export default class Publish extends Component {
                                         title='时间'
                                         type='text'
                                         editable={false}
-                                        value={this.state.timeSel}
+                                        value={timeSel}
                                     />
                                 </View>
                             </Picker>
@@ -189,7 +196,7 @@ export default class Publish extends Component {
                     <AtSwitch title='置顶' onChange={(value) => this.onIsTopChange(value)} />
                 </View>
                 <View className='save-btn'>
-                    <AtButton type='primary' disabled={!this.state.title} circle={true} onClick={() => this.handleSave()}>保存</AtButton>
+                    <AtButton type='primary' loading={isSaving} disabled={!title} circle={true} onClick={() => this.handleSave()}>保存</AtButton>
                 </View>
             </View>
         )
