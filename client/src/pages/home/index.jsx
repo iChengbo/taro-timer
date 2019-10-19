@@ -74,6 +74,14 @@ export default class Home extends Component {
         }
     }
 
+    // 微信小程序页面分享能力
+    onShareAppMessage() {
+        return {
+            title: '极时刻',
+            path: '/pages/home/index'
+        }
+    }
+
     onTimeUp() {
         Taro.showToast({
             title: '时间到',
