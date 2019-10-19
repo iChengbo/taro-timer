@@ -77,7 +77,7 @@ export default class Home extends Component {
     // 微信小程序页面分享能力
     onShareAppMessage() {
         return {
-            title: '极时刻',
+            title: '我发现了一个有趣的小程序',
             path: '/pages/home/index'
         }
     }
