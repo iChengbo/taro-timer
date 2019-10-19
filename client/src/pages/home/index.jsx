@@ -1,9 +1,7 @@
 import Taro, { Component } from '@tarojs/taro'
 import { View, FlatList } from '@tarojs/components'
 
-import Login from '../../components/login/index'
 import TimeListItem from '../../components/timeListItem'
-import Guide from '../../components/guide'
 
 import { AtFab, AtActionSheet, AtActionSheetItem } from 'taro-ui'
 
@@ -148,6 +146,7 @@ export default class Home extends Component {
     render() {
 
         const { isAuthorize, timerRecordList=[] } = this.state;
+        console.log('timerRecordList', timerRecordList)
         const { screenWidth, screenHeight, windowHeight, statusBarHeight } = Taro.getSystemInfoSync()
 
         console.log(screenHeight, windowHeight)
@@ -161,7 +160,7 @@ export default class Home extends Component {
                 <View className='index__body' style={{backgroundColor: '#e5e5e5', width: '100%'}}>
                     <View style={{ height: Taro.pxTransform(20) }}></View>
                     { !!isAuthorize &&
-                        timerRecordList.map((item, index) => {
+                        [...timerRecordList].map((item, index) => {
                             return (
                                 <View key={item._id}>
                                     <TimeListItem
