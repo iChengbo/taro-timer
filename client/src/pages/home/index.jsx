@@ -108,7 +108,7 @@ export default class Home extends Component {
 
     onReachBottom() {
         Taro.showToast({
-            title: 'onReachBottom 触底了，小伙子... \n 我要加载更多数据喽！！',
+            title: '触底了... \n 我要加载更多数据喽！！',
             icon: 'none',
             duration: 2000
         })
