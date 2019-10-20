@@ -31,7 +31,7 @@ export const transformTime = (date='2019-10-01', time='10:10') => {
 }
 
 /**
- * 
+ * 获取当前时间信息
  */
 export const getTimeInfo = (time = new Date()) => {
     const year = time.getFullYear();
