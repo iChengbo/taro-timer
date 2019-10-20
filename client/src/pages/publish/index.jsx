@@ -21,7 +21,7 @@ export default class Publish extends Component {
             title: '',
             dateSel: `${year}-${month}-${day}`,
             timeSel: `${hours}:${minutes}`,
-            isCountDown: true,
+            isCountDown: false,
             isTop: false,
             loading: true,
             isSaving: false,
@@ -193,7 +193,7 @@ export default class Publish extends Component {
                             </Picker>
                         </View>
                     </View>
-                    <AtSwitch title='置顶' onChange={(value) => this.onIsTopChange(value)} />
+                    {/* <AtSwitch title='置顶' onChange={(value) => this.onIsTopChange(value)} /> */}
                 </View>
                 <View className='save-btn'>
                     <AtButton type='primary' loading={isSaving} disabled={!title && !isSaving} circle={true} onClick={() => this.handleSave()}>保存</AtButton>

@@ -130,8 +130,8 @@ export default class TimeListItem extends Component {
     }
 
     render() {
-        const { _day, _hours, _minutes, _seconds, isTimeOut } = this.state
-        const { title, dateSel, timeSel, isCountDown } = this.props
+        const { _day, _hours, _minutes, _seconds, isTimeOut } = this.state;
+        const { title, dateSel, timeSel, isCountDown } = this.props;
 
         let bgColor = '#292b2e'
         if(!isCountDown) {
@@ -143,28 +143,38 @@ export default class TimeListItem extends Component {
                 bgColor = COLOR.YELLOW_1
             }
         }
+
+        let formatDate = !!dateSel? dateSel.replace(/-/g, '/') : dateSel;
         return (
-            <View className='timeListItem' onClick={ () => this.onClick() } onLongPress={ () => this.onLongPress() }>
+            <View className='timeListItem'
+                // style={{ backgroundColor: '#292b2e', opacity: .5 }}
+                onClick={ () => this.onClick() }
+                onLongPress={ () => this.onLongPress() }
+            >
                 <View className='timeListItem__tag' style={{ backgroundColor: bgColor }}></View>
                 <View className='fstLineWrap'>
                     <View className='fstLeftWrap'>
-                        <Text className='fstLeftWrap-text'>{title}</Text>
+                        <Text className='fstLeftWrap-title'>{title}</Text>
+                        <Text className='fstLeftWrap-goalTime'>{`${formatDate} ${timeSel}`}</Text>
                     </View>
-                    <View className='fstRightWrap'>
-                        {!!isCountDown && !!isTimeOut && <Text className='timeFormat' style={{color: bgColor}}>超出</Text> }
-                        {!!_day && <Text className='timeNumber_day'>{_day}</Text>}
-                        {!!_day && <Text className='timeFormat'>天</Text>}
-                        <Text className='timeNumber'>{_hours}</Text>
-                        <Text className='timeFormat'>时</Text>
-                        <Text className='timeNumber'>{_minutes}</Text>
-                        <Text className='timeFormat'>分</Text>
-                        <Text className='timeNumber'>{_seconds}</Text>
-                        <Text className='timeFormat'>秒</Text>
+                    <View className='fstRightWrap' style={{backgroundColor: bgColor}}>
+                        <View className='fstRightWrap-day'>
+                            <Text className='timeNumber_day'>{_day}</Text>
+                            <Text className='timeFormat_day'>天</Text>
+                        </View>
+                        <View className='fstRightWrap-other'>
+                            <Text className='timeNumber'>{_hours}</Text>
+                            <Text className='timeFormat'>时</Text>
+                            <Text className='timeNumber'>{_minutes}</Text>
+                            <Text className='timeFormat'>分</Text>
+                            <Text className='timeNumber'>{_seconds}</Text>
+                            <Text className='timeFormat'>秒</Text>
+                        </View>
                     </View>
                 </View>
-                <View className='sndLineWrap'>
+                {/* <View className='sndLineWrap'>
                     <Text className='timeGoal'>{`${dateSel} ${timeSel}`}</Text>
-                </View>
+                </View> */}
             </View>
         )
     }

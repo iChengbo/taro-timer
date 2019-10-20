@@ -43,6 +43,7 @@ export default class Login extends Component {
                 language: language,
                 province: province
             }).then(res => {
+                Taro.eventCenter.trigger('Login.complete')
                 this.setState({
                     context: res.result,
                     userInfo: res.result
