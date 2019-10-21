@@ -14,11 +14,11 @@ class App extends Component {
 
   config = {
     pages: [
+      'pages/poster/index',
       'pages/home/index',
       'pages/login/index',
       'pages/publish/index',
       'pages/user/index',
-      'pages/poster/index',
       'pages/user/feedBack/index',
     ],
     window: {
