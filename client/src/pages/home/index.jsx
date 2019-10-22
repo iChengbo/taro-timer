@@ -114,6 +114,12 @@ export default class Home extends Component {
         })
     }
 
+    onClickTimer(timerItem) {
+        Taro.navigateTo({
+            url: `/pages/poster/index?_id=${timerItem._id}`
+        })
+    }
+
     onLongPressTimer(timerItem) {
         this.setState({
             showSheet: true,
@@ -208,6 +214,7 @@ export default class Home extends Component {
                                         timeSel={item.timeSel}
                                         isCountDown={item.isCountDown}
                                         onLongPress={ () => this.onLongPressTimer(item) }
+                                        onClick={ () => this.onClickTimer(item) }
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
                                 </View>
@@ -224,6 +231,7 @@ export default class Home extends Component {
                                         timeSel={item.timeSel}
                                         isCountDown={item.isCountDown}
                                         onLongPress={ () => this.onLongPressTimer(item) }
+                                        onClick={ () => this.onClickTimer(item) }
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
                                 </View>
@@ -240,6 +248,7 @@ export default class Home extends Component {
                                         timeSel={item.timeSel}
                                         isCountDown={item.isCountDown}
                                         onLongPress={ () => this.onLongPressTimer(item) }
+                                        onClick={ () => this.onClickTimer(item) }
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
                                 </View>

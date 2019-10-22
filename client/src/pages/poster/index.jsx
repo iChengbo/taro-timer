@@ -1,7 +1,12 @@
-import Taro, { Component } from '@tarojs/taro'
+import Taro, { Component } from '@tarojs/taro';
 // 引入对应的组件
-import { View, Button, Canvas } from '@tarojs/components'
-import './index.scss'
+import { View, Button, Canvas } from '@tarojs/components';
+import { shuffle } from 'lodash';
+
+import './index.scss';
+
+import { getPosterList } from '../../apis/poster';
+import { getTimerById } from '../../apis/timer';
 
 export default class Index extends Component {
 
@@ -18,102 +23,103 @@ export default class Index extends Component {
             userInfo: {},
             // 是否展示canvas
             isShowCanvas: false,
-            fileID: 'cloud://weapp-dev-id.7765-weapp-dev-id-1300324782/my-image.jpeg',
             fileList: [],
+            currentPosterIndex: 0,
+            tempFilePath: '',
+            qcodePath: '',
         }
     }
 
     componentDidMount() {
-        const { fileID } = this.state;
-        Taro.cloud.downloadFile({
-            fileID: fileID,
-        }).then(res => {
+        const { _id } = this.$router.params;
+        console.log('_id', _id);
+        if (!!_id) {
+            getTimerById({
+                _id
+            }).then(res => {
+                const { title, dateSel, timeSel, isCountDown, isTop } = res.result;
+                console.log('获取时间事件成功', res)
+            }).catch(err => {
+                console.log('获取时间事件失败', err)
+                Taro.showToast({
+                    title: '获取数据失败',
+                    icon: 'loading'
+                })
+            })
+        }
 
+        Taro.cloud.downloadFile({
+            fileID: 'cloud://weapp-dev-id.7765-weapp-dev-id-1300324782/images/下载.png'
+        }).then(res => {
+            this.setState({
+                qcodePath: res.tempFilePath
+            })
         })
 
-        Taro.cloud.getTempFileURL({
-            fileList: [fileID]
-        }).then(res => {
-            console.log(res.fileList)
+        // 获取云存储海报列表(默认的)
+        getPosterList({}).then(res => {
+            console.log('海报列表', res)
+            // 用云文件 ID 换取真实链接（默认一天）
+            return res.result.map((item, index) => {
+                return item.fileID;
+            })
+        }).then((fileIDList) => {
+            console.log('文件id', fileIDList)
+            return Taro.cloud.getTempFileURL({
+                fileList: fileIDList
+            })
+        }).then((res) => {
+            console.log('临时链接', res.fileList)
             this.setState({
                 fileList: res.fileList
             })
-        })
-    }
-
-    /**
-     * getUserInfo() 获取用户信息
-     */
-    getUserInfo(e) {
-        if (!e.detail.userInfo) {
-            Taro.showToast({
-                title: '获取用户信息失败，请授权',
-                icon: 'none'
+            // 下载资源
+            Taro.cloud.downloadFile({
+                fileID: res.fileList[0].fileID
+            }).then((res) => {
+                console.log('rrrrr', res.tempFilePath)
+                this.setState({
+                    tempFilePath: res.tempFilePath
+                })
             })
-            return
-        }
-        this.setState({
-            isShowCanvas: true,
-            userInfo: e.detail.userInfo
-        }, () => {
-            // 调用绘制图片方法
-            this.drawImage()
         })
     }
 
-    // componentDidMount() {
-    //     const {pixelRatio} = Taro.getSystemInfoSync();
-    //     console.log('pixelRatio', pixelRatio)
-    // }
-
-    /**
-     * drawImage() 定义绘制图片的方法
-     */
+    // 定义绘制图片的方法
     drawImage() {
-        const { fileList } = this.state
+        const { tempFilePath, qcodePath } = this.state
         // 创建canvas对象
         let ctx = Taro.createCanvasContext('cardCanvas')
 
+        ctx.setFillStyle('#ffffff')
+        ctx.fillRect(0, 0, 300, 450)
+
+
+        // 绘制背景图
+        ctx.drawImage(tempFilePath, 10, 10, 280, 380);
+
+        ctx.setFontSize(24)
+        ctx.setFillStyle('#ffffff')
+        ctx.setTextAlign('center')
+        ctx.fillText('我们在一起', 150, 200)
+
+        ctx.setFontSize(28)
+        ctx.setFillStyle('#ffffff')
+        ctx.setTextAlign('center')
+        ctx.fillText('79天18时24分35秒', 150, 240)
+
+        // ctx.restore()
         // 绘制二维码
-        Taro.cloud.downloadFile({
-            fileID: 'cloud://weapp-dev-id.7765-weapp-dev-id-1300324782/my-image.jpeg',
-        }).then(res => {
-            console.log('tempFilePath', res.tempFilePath)
-            console.log('dddddddddddd', fileList[0].tempFileURL)
-            // 绘制背景图
-            ctx.drawImage(res.tempFilePath, 0, 0, 320, 450);
+        ctx.drawImage(qcodePath, 240, 395, 50, 50);
+        ctx.restore()
 
-            ctx.setFontSize(24)
-            ctx.setFillStyle('#ffffff')
-            ctx.setTextAlign('center')
-            ctx.fillText('我们在一起已经', 150, 200)
-
-            ctx.setFontSize(16)
-            ctx.setFillStyle('#ffffff')
-            ctx.setTextAlign('center')
-            ctx.fillText('79天18时24分35秒', 150, 240)
-
-            // ctx.restore()
-
-            // 将以上绘画操作进行渲染
-            // ctx.draw()
-        }).then(() => {
-            Taro.cloud.downloadFile({
-                fileID: 'cloud://weapp-dev-id.7765-weapp-dev-id-1300324782/images/下载.png',
-                success: res => {
-                    // 绘制背景图
-                    ctx.drawImage(res.tempFilePath, 250, 380, 60, 60);
-                    ctx.restore()
-
-                    // 将以上绘画操作进行渲染
-                    ctx.draw()
-                }
-            })
-        })
+        // 将以上绘画操作进行渲染
+        ctx.draw()
     }
 
+    // 保存绘图至本地相册
     saveCard() {
-        const {pixelRatio} = Taro.getSystemInfoSync();
+        const { pixelRatio } = Taro.getSystemInfoSync();
         Taro.canvasToTempFilePath({
             x: 0,
             y: 0,
@@ -129,41 +135,43 @@ export default class Index extends Component {
             })
         }).then((saveRes) => {
             console.log('saveRes', saveRes)
-            if (saveRes.errMsg === 'saveImageToPhotosAlbum:ok') {
-                Taro.showModal({
-                    title: '图片保存成功',
-                    content: '图片成功保存到相册了，快去发朋友圈吧~',
-                    showCancel: false,
-                    confirmText: '确认'
-                })
-            } else {
-                Taro.showModal({
-                    title: '图片保存失败',
-                    content: '请重新尝试!',
-                    showCancel: false,
-                    confirmText: '确认'
-                })
+            let noticeTitle = '图片保存成功', noticeContent = '图片成功保存到相册了\n快去发朋友圈吧~';
+            if (saveRes.errMsg != 'saveImageToPhotosAlbum:ok') {
+                noticeTitle = '图片保存失败';
+                noticeContent = '请重新尝试!'
             }
+            Taro.showModal({
+                title: noticeTitle,
+                content: noticeContent,
+                showCancel: false,
+                confirmText: '确认',
+                success: () => {
+                    this.setState({
+                        isShowCanvas: false
+                    })
+                }
+            })
         })
     }
 
     render() {
-        let { isShowCanvas, fileList } = this.state
+        let { isShowCanvas, fileList, currentPosterIndex } = this.state
+        console.log(isShowCanvas)
         return (
             <View className='index'>
                 <Image
                     className='index_img'
-                    src={fileList[0].tempFileURL}
+                    src={fileList[currentPosterIndex].tempFileURL}
                     mode='aspectFill'
                 ></Image>
-                <Button onGetUserInfo={this.getUserInfo} openType="getUserInfo" type="primary" size="mini">打卡</Button>
+                <Button type="primary" size="mini">打卡</Button>
                 {
                     isShowCanvas &&
                     <View className="canvas-wrap">
                         <Canvas
                             id="card-canvas"
                             className="card-canvas"
-                            style="width: 320px; height: 450px"
+                            style="width: 300px; height: 450px"
                             canvasId="cardCanvas" >
                         </Canvas>
                         <Button onClick={this.saveCard} className="btn-save" type="primary" size="mini">保存到相册</Button>

@@ -4,7 +4,7 @@ import { View, Text, Input, Picker, Button } from '@tarojs/components'
 import { AtInput, AtSwitch, AtButton, AtActivityIndicator } from 'taro-ui'
 
 import { getTimeInfo } from '../../utils/timeFunctions';
-import { postTimer } from '../../apis/timer';
+import { postTimer, getTimerById } from '../../apis/timer';
 import { throttle } from 'lodash';
 import './index.scss';
 
@@ -34,14 +34,8 @@ export default class Publish extends Component {
         const { _id } = this.$router.params;
         console.log('_id', _id);
         if (!!_id) {
-            Taro.cloud.callFunction({
-                name: 'getTimerById',
-                config: {
-                    env: process.env.NODE_ENV
-                },
-                data: {
-                    _id,
-                }
+            getTimerById({
+                _id
             }).then(res => {
                 const { title, dateSel, timeSel, isCountDown, isTop } = res.result;
                 console.log('获取时间事件成功', res)
