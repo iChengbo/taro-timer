@@ -3,7 +3,7 @@ import { View, Image, ScrollView } from '@tarojs/components'
 
 import TimeListItem from '../../components/timeListItem'
 
-import { AtFab, AtActionSheet, AtActionSheetItem, AtDivider } from 'taro-ui'
+import { AtFab, AtDivider } from 'taro-ui'
 
 import { getTimerList, deleteTimerById } from '../../apis/timer'
 import { isLoggin } from '../../utils/checker';
@@ -17,15 +17,10 @@ export default class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            showDrawer: false,
-            showSheet: false,
-            selectTimer: {},
             isAuthorize: false,
             timerRecordList: [],
         }
     }
-
-    componentWillMount() { }
 
     componentDidMount() {
         isLoggin().then((res) => {
@@ -48,14 +43,12 @@ export default class Home extends Component {
         Taro.eventCenter.on('Login.complete', () => {
             console.log('完成登录 我要刷新列表')
             this.refreshTimerList();
-        })
+        });
+        Taro.eventCenter.on('Poster.delete', () => {
+            console.log('完成删除 我要刷新列表')
+            this.refreshTimerList();
+        });
     }
-
-    componentWillUnmount() { }
-
-    componentDidShow() { }
-
-    componentDidHide() { }
 
     shouldComponentUpdate(nextProps, nextState) {
         if(this.state.isAuthorize !== nextState.isAuthorize) {
@@ -108,7 +101,7 @@ export default class Home extends Component {
 
     onReachBottom() {
         Taro.showToast({
-            title: '触底了... \n 我要加载更多数据喽！！',
+            title: '触底了...',
             icon: 'none',
             duration: 2000
         })
@@ -117,47 +110,6 @@ export default class Home extends Component {
     onClickTimer(timerItem) {
         Taro.navigateTo({
             url: `/pages/poster/index?_id=${timerItem._id}`
-        })
-    }
-
-    onLongPressTimer(timerItem) {
-        this.setState({
-            showSheet: true,
-            selectTimer: timerItem,
-        })
-    }
-    deleteSelectTimer() {
-        this.setState({
-            showSheet: false,
-        }, () => {
-            const { _id } = this.state.selectTimer;
-            deleteTimerById({_id}).then(res => {
-                console.log('删除成功', res);
-                Taro.eventCenter.trigger('Publish.complete')
-            })
-        })
-    }
-
-    editSelectTimer() {
-        this.setState({
-            showSheet: false,
-        }, () => {
-            const { _id } = this.state.selectTimer
-            Taro.navigateTo({
-                url: `/pages/publish/index?_id=${_id}`
-            })
-        })
-    }
-
-    posterSelectTimer() {
-        const { selectTimer } = this.state;
-        const timerId = selectTimer.id;
-        this.setState({
-            showSheet: false,
-        }, () => {
-            Taro.navigateTo({
-                url: `/pages/poster/index?timerId=${timerId}`
-            })
         })
     }
 
@@ -204,6 +156,23 @@ export default class Home extends Component {
                     src='http://pic.51yuansu.com/backgd/cover/00/35/48/5bd7c7ae02be4.jpg!/fw/780/quality/90/unsharp/true/compress/true'
                 /> */}
                 <View scrollY className='index__body' style={{backgroundColor: '#ffffff', width: '100%'}}>
+                    { overList.length > 0 && <AtDivider content='超时倒计时' fontColor={COLOR.RED_1} lineColor={COLOR.RED_1} /> }
+                    { overList.map((item, index) => {
+                            return (
+                                <View key={item._id}>
+                                    <TimeListItem
+                                        title={item.title}
+                                        dateSel={item.dateSel}
+                                        timeSel={item.timeSel}
+                                        isCountDown={item.isCountDown}
+                                        onLongPress={ () => this.onLongPressTimer(item) }
+                                        onClick={ () => this.onClickTimer(item) }
+                                    ></TimeListItem>
+                                    <View style={{ height: Taro.pxTransform(20) }}></View>
+                                </View>
+                            )
+                        })
+                    }
                     { goalList.length > 0 && <AtDivider content='目标倒计时' fontColor={COLOR.YELLOW_1} lineColor={COLOR.YELLOW_1} />}
                     { goalList.map((item, index) => {
                             return (
@@ -238,35 +207,7 @@ export default class Home extends Component {
                             )
                         })
                     }
-                    { overList.length > 0 && <AtDivider content='超时倒计时' fontColor={COLOR.RED_1} lineColor={COLOR.RED_1} /> }
-                    { overList.map((item, index) => {
-                            return (
-                                <View key={item._id}>
-                                    <TimeListItem
-                                        title={item.title}
-                                        dateSel={item.dateSel}
-                                        timeSel={item.timeSel}
-                                        isCountDown={item.isCountDown}
-                                        onLongPress={ () => this.onLongPressTimer(item) }
-                                        onClick={ () => this.onClickTimer(item) }
-                                    ></TimeListItem>
-                                    <View style={{ height: Taro.pxTransform(20) }}></View>
-                                </View>
-                            )
-                        })
-                    }
                 </View>
-                <AtActionSheet isOpened={this.state.showSheet} cancelText='取消'>
-                    <AtActionSheetItem onClick={ () => this.deleteSelectTimer() }>
-                        删除
-                    </AtActionSheetItem>
-                    <AtActionSheetItem onClick={ () => this.editSelectTimer() }>
-                        编辑
-                    </AtActionSheetItem>
-                    {/* <AtActionSheetItem onClick={ () => this.posterSelectTimer() }>
-                        海报
-                    </AtActionSheetItem> */}
-                </AtActionSheet>
             </View>
         )
     }

@@ -1,12 +1,13 @@
 import Taro, { Component } from '@tarojs/taro';
 // 引入对应的组件
 import { View, Button, Canvas } from '@tarojs/components';
+import { AtIcon, AtButton, AtActivityIndicator } from 'taro-ui';
 import { shuffle } from 'lodash';
 
 import './index.scss';
 
 import { getPosterList } from '../../apis/poster';
-import { getTimerById } from '../../apis/timer';
+import { getTimerById, deleteTimerById } from '../../apis/timer';
 
 export default class Index extends Component {
 
@@ -24,9 +25,13 @@ export default class Index extends Component {
             // 是否展示canvas
             isShowCanvas: false,
             fileList: [],
-            currentPosterIndex: 0,
-            tempFilePath: '',
+            currentFileIndex: 0,
+            backGroundImage: '',
+            drawTempFilePath: '',
             qcodePath: '',
+            showSheet: false,
+            isLoading: true,
+            timerItem: {},
         }
     }
 
@@ -39,11 +44,14 @@ export default class Index extends Component {
             }).then(res => {
                 const { title, dateSel, timeSel, isCountDown, isTop } = res.result;
                 console.log('获取时间事件成功', res)
+                this.setState({
+                    timerItem: res.result
+                })
             }).catch(err => {
                 console.log('获取时间事件失败', err)
                 Taro.showToast({
                     title: '获取数据失败',
-                    icon: 'loading'
+                    icon: 'none'
                 })
             })
         }
@@ -56,6 +64,7 @@ export default class Index extends Component {
             })
         })
 
+        const {currentFileIndex} = this.state;
         // 获取云存储海报列表(默认的)
         getPosterList({}).then(res => {
             console.log('海报列表', res)
@@ -70,24 +79,38 @@ export default class Index extends Component {
             })
         }).then((res) => {
             console.log('临时链接', res.fileList)
+            let tmpFileList = shuffle(res.fileList);
             this.setState({
-                fileList: res.fileList
+                fileList: tmpFileList,
+                isLoading: false,
+                backGroundImage: tmpFileList[currentFileIndex].tempFileURL
             })
             // 下载资源
             Taro.cloud.downloadFile({
-                fileID: res.fileList[0].fileID
+                fileID: tmpFileList[currentFileIndex].fileID
             }).then((res) => {
                 console.log('rrrrr', res.tempFilePath)
                 this.setState({
-                    tempFilePath: res.tempFilePath
+                    drawTempFilePath: res.tempFilePath
                 })
             })
         })
     }
 
+    // 微信小程序页面分享能力
+    onShareAppMessage() {
+        return {
+            title: 'XXX\n29天12时11分10秒',
+            path: '/pages/home/index'
+        }
+    }
+
     // 定义绘制图片的方法
     drawImage() {
-        const { tempFilePath, qcodePath } = this.state
+        this.setState({
+            isShowCanvas: true
+        })
+        const { drawTempFilePath, qcodePath } = this.state
         // 创建canvas对象
         let ctx = Taro.createCanvasContext('cardCanvas')
 
@@ -96,7 +119,7 @@ export default class Index extends Component {
 
 
         // 绘制背景图
-        ctx.drawImage(tempFilePath, 10, 10, 280, 380);
+        ctx.drawImage(drawTempFilePath, 10, 10, 280, 380);
 
         ctx.setFontSize(24)
         ctx.setFillStyle('#ffffff')
@@ -154,20 +177,100 @@ export default class Index extends Component {
         })
     }
 
+    // 跳转到编辑页
+    handleEditIcon() {
+        const { _id } = this.$router.params;
+        Taro.navigateTo({
+            url: `/pages/publish/index?_id=${_id}`
+        })
+    }
+
+    // 删除确认
+    handleDeleteIcon() {
+        const { _id } = this.$router.params;
+        Taro.showModal({
+            title: '提示',
+            content: '是否删除该事件？',
+            success: (res) => {
+                if (res.confirm) {
+                    deleteTimerById({ _id }).then(res => {
+                        console.log('删除成功', res);
+                        Taro.eventCenter.trigger('Poster.delete');
+                        Taro.navigateBack();
+                    })
+                } else {
+                    console.log('用户点击取消')
+                }
+            }
+        })
+    }
+
+    // 隐藏绘制好的海报
+    hiddenCanvas() {
+        return;
+        console.log('隐藏海报')
+        this.setState({
+            isShowCanvas: false
+        })
+    }
+
+    // 更换背景图
+    updateBackGroundImage() {
+        Taro.chooseImage({
+            count: 1,
+            success: (res) => {
+                var tempFilePaths = res.tempFilePaths;
+                console.log('tempFilePaths', tempFilePaths)
+                this.setState({
+                    backGroundImage: tempFilePaths[0]
+                })
+            }
+        })
+
+    }
+
     render() {
-        let { isShowCanvas, fileList, currentPosterIndex } = this.state
+        let { isShowCanvas, backGroundImage, isLoading, timerItem } = this.state
         console.log(isShowCanvas)
+
+        if (isLoading) {
+            return (
+                <View className='container'>
+                    <AtActivityIndicator mode='center' size={96} content='努力加载中...'></AtActivityIndicator>
+                </View>
+            )
+        }
+
         return (
-            <View className='index'>
+            <View className='poster'>
                 <Image
-                    className='index_img'
-                    src={fileList[currentPosterIndex].tempFileURL}
+                    className='poster__img'
+                    src={backGroundImage}
                     mode='aspectFill'
                 ></Image>
-                <Button type="primary" size="mini">打卡</Button>
+                <View className='poster__buttons'>
+                    <AtButton circle={true} customStyle={{ border: 'none' }} onClick={() => this.handleEditIcon()}>
+                        <AtIcon value='edit' size='20' color='#fff'></AtIcon>
+                    </AtButton>
+                    <AtButton circle={true} customStyle={{ border: 'none' }} onClick={() => this.handleDeleteIcon()}>
+                        <AtIcon value='trash' size='20' color='#fff'></AtIcon>
+                    </AtButton>
+                    <AtButton openType='share' circle={true} customStyle={{ border: 'none' }}>
+                        <AtIcon value='share' size='20' color='#fff'></AtIcon>
+                    </AtButton>
+                    <AtButton circle={true} customStyle={{ border: 'none' }} onClick={() => this.drawImage()}>
+                        <AtIcon value='camera' size='20' color='#fff'></AtIcon>
+                    </AtButton>
+                    <AtButton circle={true} customStyle={{ border: 'none' }} onClick={() => this.updateBackGroundImage()}>
+                        <AtIcon value='image' size='20' color='#fff'></AtIcon>
+                    </AtButton>
+                </View>
+                <View className='poster__content'>
+                    <Text className='poster__content-title'>{timerItem.title}</Text>
+                </View>
                 {
                     isShowCanvas &&
-                    <View className="canvas-wrap">
+                    <View className="canvas-wrap" onClick={() => this.hiddenCanvas()}>
                         <Canvas
                             id="card-canvas"
                             className="card-canvas"
