@@ -142,8 +142,10 @@ export default class Index extends Component {
 
     // 微信小程序页面分享能力
     onShareAppMessage() {
+        const { timerItem, timeSeconds } = this.state;
+        const { day, hours, minutes, seconds } = calculateTime(timeSeconds);
         return {
-            title: 'XXX\n29天12时11分10秒',
+            title: `${timerItem.title}\n${day}天${hours}时${minutes}分${seconds}秒`,
             path: '/pages/home/index'
         }
     }
