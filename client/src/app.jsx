@@ -29,6 +29,8 @@ class App extends Component {
     },
     cloud: true,
     tabBar: {
+      color: '#bfbfbf',
+      selectedColor: '#6190E8',
       list: [{
         pagePath: "pages/home/index",
         text: "首页",
