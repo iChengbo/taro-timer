@@ -56,31 +56,34 @@ export default class Index extends Component {
         })
     }
 
+    updateTimerById(_id) {
+        getTimerById({_id}).then((res) => {
+            const { dateSel, timeSel } = res.result;
+            const goalSeconds = transformTime(dateSel, timeSel);
+            const timeSeconds = Math.abs((goalSeconds - Date.now())/1000)
+            console.log('获取时间事件成功', res, goalSeconds)
+            this.setState({
+                timerItem: res.result,
+                timeSeconds,
+                goalSeconds: goalSeconds/1000
+            }, () => {
+                clearTimeout(this.state.timer);
+                this.updateTimeSeconds();
+            })
+        }).catch(err => {
+            console.log('获取时间事件失败', err)
+            Taro.showToast({
+                title: '获取数据失败',
+                icon: 'none'
+            })
+        })
+    }
+
     componentDidMount() {
         const { _id } = this.$router.params;
         console.log('_id', _id);
         if (!!_id) {
-            getTimerById({
-                _id
-            }).then(res => {
-                const { title, dateSel, timeSel, isCountDown, isTop } = res.result;
-                const goalSeconds = transformTime(dateSel, timeSel);
-                const timeSeconds = Math.abs((goalSeconds - Date.now())/1000)
-                console.log('获取时间事件成功', res, goalSeconds)
-                this.setState({
-                    timerItem: res.result,
-                    timeSeconds,
-                    goalSeconds: goalSeconds/1000
-                }, () => {
-                    this.updateTimeSeconds();
-                })
-            }).catch(err => {
-                console.log('获取时间事件失败', err)
-                Taro.showToast({
-                    title: '获取数据失败',
-                    icon: 'none'
-                })
-            })
+            this.updateTimerById(_id);
         }
 
         let qCodePath = 'cloud://weapp-release-id.7765-weapp-release-id-1300324782/images/qcode/qcode.png';
@@ -126,6 +129,11 @@ export default class Index extends Component {
                 })
             })
         })
+        Taro.eventCenter.on('Publish.complete', () => {
+            console.log('完成修改 我要刷新')
+            const { _id } = this.$router.params;
+            this.updateTimerById(_id)
+        });
     }
 
     componentWillUnmount() {

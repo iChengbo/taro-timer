@@ -165,7 +165,6 @@ export default class Home extends Component {
                                         dateSel={item.dateSel}
                                         timeSel={item.timeSel}
                                         isCountDown={item.isCountDown}
-                                        onLongPress={ () => this.onLongPressTimer(item) }
                                         onClick={ () => this.onClickTimer(item) }
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
@@ -182,7 +181,6 @@ export default class Home extends Component {
                                         dateSel={item.dateSel}
                                         timeSel={item.timeSel}
                                         isCountDown={item.isCountDown}
-                                        onLongPress={ () => this.onLongPressTimer(item) }
                                         onClick={ () => this.onClickTimer(item) }
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
@@ -199,7 +197,6 @@ export default class Home extends Component {
                                         dateSel={item.dateSel}
                                         timeSel={item.timeSel}
                                         isCountDown={item.isCountDown}
-                                        onLongPress={ () => this.onLongPressTimer(item) }
                                         onClick={ () => this.onClickTimer(item) }
                                     ></TimeListItem>
                                     <View style={{ height: Taro.pxTransform(20) }}></View>
