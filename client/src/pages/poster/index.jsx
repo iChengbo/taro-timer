@@ -83,15 +83,16 @@ export default class Index extends Component {
             })
         }
 
-        // Taro.cloud.downloadFile({
-        //     fileID: 'cloud://weapp-dev-id.7765-weapp-dev-id-1300324782/images/下载.png'
-        // }).then(res => {
-        //     this.setState({
-        //         qcodePath: res.tempFilePath
-        //     })
-        // })
-        this.setState({
-            qcodePath: '../../images/qcode.png'
+        let qCodePath = 'cloud://weapp-release-id.7765-weapp-release-id-1300324782/images/qcode/qcode.png';
+        if(process.env.NODE_ENV == 'weapp-dev-id') {
+            qCodePath = 'cloud://weapp-dev-id.7765-weapp-dev-id-1300324782/images/下载.png';
+        }
+        Taro.cloud.downloadFile({
+            fileID: qCodePath
+        }).then(res => {
+            this.setState({
+                qcodePath: res.tempFilePath
+            })
         })
 
         const {currentFileIndex} = this.state;
