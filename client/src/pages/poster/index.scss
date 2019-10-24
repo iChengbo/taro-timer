@@ -22,9 +22,17 @@ page{
     }
     &__content{
 		margin-top: -600px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 		&-title{
 			color: #ffffff;
 			font-size: 48px;
+			margin-bottom: 80px;
+		}
+		&-time{
+			color: #ffffff;
+			font-size: 52px;
 		}
     }
 }

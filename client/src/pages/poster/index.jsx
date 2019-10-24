@@ -8,6 +8,7 @@ import './index.scss';
 
 import { getPosterList } from '../../apis/poster';
 import { getTimerById, deleteTimerById } from '../../apis/timer';
+import { calculateTime, transformTime, getTimeInfo } from '../../utils/timeFunctions';
 
 export default class Index extends Component {
 
@@ -31,8 +32,28 @@ export default class Index extends Component {
             qcodePath: '',
             showSheet: false,
             isLoading: true,
+            timer: null,
             timerItem: {},
+            // 时间差(秒)
+            timeSeconds: 0,
+            goalSeconds: 0,
         }
+    }
+
+    updateTimeSeconds() {
+        const { goalSeconds } = this.state;
+        const crtSeconds = +Date.now()/1000;
+        let newTimeSeconds = Math.abs(goalSeconds - crtSeconds);
+        this.setState({
+            timeSeconds: newTimeSeconds
+        }, () => {
+            let timer = setTimeout(() => {
+                this.updateTimeSeconds()
+            }, 1000);
+            this.setState({
+                timer
+            })
+        })
     }
 
     componentDidMount() {
@@ -43,9 +64,15 @@ export default class Index extends Component {
                 _id
             }).then(res => {
                 const { title, dateSel, timeSel, isCountDown, isTop } = res.result;
-                console.log('获取时间事件成功', res)
+                const goalSeconds = transformTime(dateSel, timeSel);
+                const timeSeconds = Math.abs((goalSeconds - Date.now())/1000)
+                console.log('获取时间事件成功', res, goalSeconds)
                 this.setState({
-                    timerItem: res.result
+                    timerItem: res.result,
+                    timeSeconds,
+                    goalSeconds: goalSeconds/1000
+                }, () => {
+                    this.updateTimeSeconds();
                 })
             }).catch(err => {
                 console.log('获取时间事件失败', err)
@@ -56,12 +83,15 @@ export default class Index extends Component {
             })
         }
 
-        Taro.cloud.downloadFile({
-            fileID: 'cloud://weapp-dev-id.7765-weapp-dev-id-1300324782/images/下载.png'
-        }).then(res => {
-            this.setState({
-                qcodePath: res.tempFilePath
-            })
+        // Taro.cloud.downloadFile({
+        //     fileID: 'cloud://weapp-dev-id.7765-weapp-dev-id-1300324782/images/下载.png'
+        // }).then(res => {
+        //     this.setState({
+        //         qcodePath: res.tempFilePath
+        //     })
+        // })
+        this.setState({
+            qcodePath: '../../images/qcode.png'
         })
 
         const {currentFileIndex} = this.state;
@@ -97,6 +127,10 @@ export default class Index extends Component {
         })
     }
 
+    componentWillUnmount() {
+        clearTimeout(this.state.timer)
+    }
+
     // 微信小程序页面分享能力
     onShareAppMessage() {
         return {
@@ -110,7 +144,9 @@ export default class Index extends Component {
         this.setState({
             isShowCanvas: true
         })
-        const { drawTempFilePath, qcodePath } = this.state
+        const { drawTempFilePath, qcodePath, timerItem, timeSeconds } = this.state
+        const { day, hours, minutes, seconds } = calculateTime(timeSeconds);
+
         // 创建canvas对象
         let ctx = Taro.createCanvasContext('cardCanvas')
 
@@ -121,20 +157,33 @@ export default class Index extends Component {
         // 绘制背景图
         ctx.drawImage(drawTempFilePath, 10, 10, 280, 380);
 
+        ctx.setFontSize(12)
+        ctx.setFillStyle('#ffffff')
+        ctx.setTextAlign('left')
+        // ctx.fillText(timerItem.dateSel.replace(/-/g, '/') + ' ' + timerItem.timeSel+':00', 20, 30)
+        const crtTime = getTimeInfo()
+        ctx.fillText(`${crtTime.year}/${crtTime.month}/${crtTime.day} ${crtTime.hours}:${crtTime.minutes}:${crtTime.seconds}`, 20, 30)
+
         ctx.setFontSize(24)
         ctx.setFillStyle('#ffffff')
         ctx.setTextAlign('center')
-        ctx.fillText('我们在一起', 150, 200)
+        ctx.fillText(timerItem.title, 150, 200)
 
         ctx.setFontSize(28)
         ctx.setFillStyle('#ffffff')
         ctx.setTextAlign('center')
-        ctx.fillText('79天18时24分35秒', 150, 240)
+        ctx.fillText(`${day}天${hours}时${minutes}分${seconds}秒`, 150, 240)
 
-        // ctx.restore()
+        ctx.restore()
         // 绘制二维码
         ctx.drawImage(qcodePath, 240, 395, 50, 50);
         ctx.restore()
+
+        ctx.setFontSize(12)
+        ctx.setFillStyle('#666666')
+        ctx.setTextAlign('left')
+        ctx.fillText('长按识别小程序码', 10, 410)
+        ctx.fillText('打开极时刻，记录每一个美好的时刻', 10, 430)
 
         // 将以上绘画操作进行渲染
         ctx.draw()
@@ -222,7 +271,8 @@ export default class Index extends Component {
                 var tempFilePaths = res.tempFilePaths;
                 console.log('tempFilePaths', tempFilePaths)
                 this.setState({
-                    backGroundImage: tempFilePaths[0]
+                    backGroundImage: tempFilePaths[0],
+                    drawTempFilePath: tempFilePaths[0]
                 })
             }
         })
@@ -230,8 +280,7 @@ export default class Index extends Component {
     }
 
     render() {
-        let { isShowCanvas, backGroundImage, isLoading, timerItem } = this.state
-        console.log(isShowCanvas)
+        let { isShowCanvas, backGroundImage, isLoading, timerItem, timeSeconds} = this.state
 
         if (isLoading) {
             return (
@@ -240,6 +289,8 @@ export default class Index extends Component {
                 </View>
             )
         }
+
+        const { day, hours, minutes, seconds } = calculateTime(timeSeconds);
 
         return (
             <View className='poster'>
@@ -267,6 +318,7 @@ export default class Index extends Component {
                 </View>
                 <View className='poster__content'>
                     <Text className='poster__content-title'>{timerItem.title}</Text>
+                    <Text className='poster__content-time'>{day}天{hours}时{minutes}分{seconds}秒</Text>
                 </View>
                 {
                     isShowCanvas &&
