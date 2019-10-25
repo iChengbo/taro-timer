@@ -287,7 +287,6 @@ export default class Index extends Component {
                 })
             }
         })
-
     }
 
     render() {
@@ -311,6 +310,9 @@ export default class Index extends Component {
                     mode='aspectFill'
                 ></Image>
                 <View className='poster__buttons'>
+                    <AtButton circle={true} customStyle={{ border: 'none' }} onClick={() => { Taro.navigateBack() }}>
+                        <AtIcon value='chevron-left' size='20' color='#fff'></AtIcon>
+                    </AtButton>
                     <AtButton circle={true} customStyle={{ border: 'none' }} onClick={() => this.handleEditIcon()}>
                         <AtIcon value='edit' size='20' color='#fff'></AtIcon>
                     </AtButton>
