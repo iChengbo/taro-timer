@@ -151,6 +151,7 @@ export default class Publish extends Component {
                     <AtButton full={false} size='small' circle={true} type={isCountDown ? 'primary' : 'secondary'} onClick={() => this.onIsCountDownChange(true)}>倒计时</AtButton>
                 </View>
                 <AtInput
+                    focus={true}
                     name='value'
                     title='标题'
                     type='text'
@@ -161,7 +162,7 @@ export default class Publish extends Component {
                 <View className='page-body'>
                     <View className='page-section'>
                         <View>
-                            <Picker mode='date' onChange={this.onDateChange}>
+                            <Picker mode='date' value={dateSel} onChange={this.onDateChange}>
                                 <AtInput
                                     name='value'
                                     title='日期'
@@ -174,7 +175,7 @@ export default class Publish extends Component {
                     </View>
                     <View className='page-section'>
                         <View>
-                            <Picker mode='time' onChange={this.onTimeChange}>
+                            <Picker mode='time' value={timeSel} onChange={this.onTimeChange}>
                                 <View className='picker'>
                                     <AtInput
                                         name='value'

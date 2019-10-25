@@ -3,9 +3,10 @@ import { View, Image, ScrollView } from '@tarojs/components'
 
 import TimeListItem from '../../components/timeListItem'
 
-import { AtFab, AtDivider } from 'taro-ui'
+import { AtFab, AtDivider, AtButton } from 'taro-ui'
 
-import { getTimerList, deleteTimerById } from '../../apis/timer'
+import { getTimerList, deleteTimerById } from '../../apis/timer';
+import { postUserInfo } from '../../apis/user';
 import { isLoggin } from '../../utils/checker';
 import { COLOR } from '../../constants/colors';
 import { transformTime } from '../../utils/timeFunctions'
@@ -31,9 +32,9 @@ export default class Home extends Component {
             this.refreshTimerList();
         }).catch((err) => {
             console.log('未授权', err)
-            Taro.navigateTo({
-                url: '/pages/login/index'
-            })
+            // Taro.navigateTo({
+            //     url: '/pages/login/index'
+            // })
         })
 
         Taro.eventCenter.on('Publish.complete', () => {
@@ -51,10 +52,10 @@ export default class Home extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if(this.state.isAuthorize !== nextState.isAuthorize) {
+        if (this.state.isAuthorize !== nextState.isAuthorize) {
             return true;
         }
-        if(this.state.timerRecordList.length != nextState.timerRecordList.length) {
+        if (this.state.timerRecordList.length != nextState.timerRecordList.length) {
             return true;
         }
     }
@@ -113,21 +114,79 @@ export default class Home extends Component {
         })
     }
 
+    handleLongPress(timerItem) {
+        Taro.showModal({
+            title: '提示',
+            content: '确认删除该记录吗？',
+            success: (res) => {
+                if(res.confirm) {
+                    deleteTimerById({
+                        _id: timerItem._id
+                    }).then((res) => {
+                        if(!!res.result) {
+                            console.log('删除成功')
+                            Taro.eventCenter.trigger('Poster.delete')
+                        } else {
+                            console.log('删除失败')
+                        }
+                    })
+                }
+            }
+        })
+    }
+
+    onGotUserInfo(e) {
+        console.log(e)
+        const { detail } = e;
+        if (detail.errMsg.endsWith('ok')) {
+            const userInfo = JSON.parse(detail.rawData)
+            const { nickName, gender, avatarUrl, city, country, language, province } = userInfo
+            postUserInfo({
+                name: nickName,
+                gender: gender,
+                avatarUrl: avatarUrl,
+                city: city,
+                country: country,
+                language: language,
+                province: province
+            }).then(res => {
+                Taro.eventCenter.trigger('Login.complete')
+                this.setState({
+                    isAuthorize: true
+                })
+            })
+        }
+    }
+
     render() {
 
-        const { isAuthorize, timerRecordList=[] } = this.state;
-        // console.log('timerRecordList', timerRecordList)
-        // const { screenWidth, screenHeight, windowHeight, statusBarHeight } = Taro.getSystemInfoSync()
-        // console.log(screenHeight, windowHeight)
+        const { isAuthorize, timerRecordList = [] } = this.state;
+
+        // 未授权，即未登录
+        if (!isAuthorize) {
+            return (
+                <View className='index'>
+                    <View className='index__fab'>
+                        <AtFab onClick={() => this.handleClickAdd()}>
+                            <Text className='at-fab__icon at-icon at-icon-add'></Text>
+                        </AtFab>
+                    </View>
+                    <View className='index__introduct'>
+                        <Text className='index__introduct-text'>这里空空如也，登录后方添加第一条记录哦~</Text>
+                        <AtButton type='primary' openType="getUserInfo" onGetUserInfo={(e) => this.onGotUserInfo(e)}>登录</AtButton>
+                    </View>
+                </View>
+            )
+        }
 
         let goalList = [], memoList = [], overList = [];
         timerRecordList.forEach((item, index) => {
-            if(!item.isCountDown) {
+            if (!item.isCountDown) {
                 memoList.push(item);
             } else {
                 // 目标时间 - 当前时间
                 let overTime = transformTime(item.dateSel, item.timeSel) - Date.parse(new Date());
-                if(overTime < 0) {
+                if (overTime < 0) {
                     overList.push(item);
                 } else {
                     goalList.push(item);
@@ -155,54 +214,55 @@ export default class Home extends Component {
                     className='index__backImage'
                     src='http://pic.51yuansu.com/backgd/cover/00/35/48/5bd7c7ae02be4.jpg!/fw/780/quality/90/unsharp/true/compress/true'
                 /> */}
-                <View scrollY className='index__body' style={{backgroundColor: '#ffffff', width: '100%'}}>
-                    { overList.length > 0 && <AtDivider content='超时倒计时' fontColor={COLOR.RED_1} lineColor={COLOR.RED_1} /> }
-                    { overList.map((item, index) => {
-                            return (
-                                <View key={item._id}>
-                                    <TimeListItem
-                                        title={item.title}
-                                        dateSel={item.dateSel}
-                                        timeSel={item.timeSel}
-                                        isCountDown={item.isCountDown}
-                                        onClick={ () => this.onClickTimer(item) }
-                                    ></TimeListItem>
-                                    <View style={{ height: Taro.pxTransform(20) }}></View>
-                                </View>
-                            )
-                        })
+                <View scrollY className='index__body' style={{ backgroundColor: '#ffffff', width: '100%' }}>
+                    {overList.length > 0 && <AtDivider content='超时倒计时' fontColor={COLOR.RED_1} lineColor={COLOR.RED_1} />}
+                    {overList.map((item, index) => {
+                        return (
+                            <View key={item._id}>
+                                <TimeListItem
+                                    title={item.title}
+                                    dateSel={item.dateSel}
+                                    timeSel={item.timeSel}
+                                    isCountDown={item.isCountDown}
+                                    onClick={() => this.onClickTimer(item)}
+                                    onLongPress={() => this.handleLongPress(item)}
+                                ></TimeListItem>
+                                <View style={{ height: Taro.pxTransform(20) }}></View>
+                            </View>
+                        )
+                    })
                     }
-                    { goalList.length > 0 && <AtDivider content='目标倒计时' fontColor={COLOR.YELLOW_1} lineColor={COLOR.YELLOW_1} />}
-                    { goalList.map((item, index) => {
-                            return (
-                                <View key={item._id}>
-                                    <TimeListItem
-                                        title={item.title}
-                                        dateSel={item.dateSel}
-                                        timeSel={item.timeSel}
-                                        isCountDown={item.isCountDown}
-                                        onClick={ () => this.onClickTimer(item) }
-                                    ></TimeListItem>
-                                    <View style={{ height: Taro.pxTransform(20) }}></View>
-                                </View>
-                            )
-                        })
+                    {goalList.length > 0 && <AtDivider content='目标倒计时' fontColor={COLOR.YELLOW_1} lineColor={COLOR.YELLOW_1} />}
+                    {goalList.map((item, index) => {
+                        return (
+                            <View key={item._id}>
+                                <TimeListItem
+                                    title={item.title}
+                                    dateSel={item.dateSel}
+                                    timeSel={item.timeSel}
+                                    isCountDown={item.isCountDown}
+                                    onClick={() => this.onClickTimer(item)}
+                                ></TimeListItem>
+                                <View style={{ height: Taro.pxTransform(20) }}></View>
+                            </View>
+                        )
+                    })
                     }
-                    { memoList.length > 0 && <AtDivider content='纪念日计时' fontColor={COLOR.GREEN_1} lineColor={COLOR.GREEN_1} />}
-                    { memoList.map((item, index) => {
-                            return (
-                                <View key={item._id}>
-                                    <TimeListItem
-                                        title={item.title}
-                                        dateSel={item.dateSel}
-                                        timeSel={item.timeSel}
-                                        isCountDown={item.isCountDown}
-                                        onClick={ () => this.onClickTimer(item) }
-                                    ></TimeListItem>
-                                    <View style={{ height: Taro.pxTransform(20) }}></View>
-                                </View>
-                            )
-                        })
+                    {memoList.length > 0 && <AtDivider content='纪念日计时' fontColor={COLOR.GREEN_1} lineColor={COLOR.GREEN_1} />}
+                    {memoList.map((item, index) => {
+                        return (
+                            <View key={item._id}>
+                                <TimeListItem
+                                    title={item.title}
+                                    dateSel={item.dateSel}
+                                    timeSel={item.timeSel}
+                                    isCountDown={item.isCountDown}
+                                    onClick={() => this.onClickTimer(item)}
+                                ></TimeListItem>
+                                <View style={{ height: Taro.pxTransform(20) }}></View>
+                            </View>
+                        )
+                    })
                     }
                 </View>
             </View>
