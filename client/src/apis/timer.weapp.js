@@ -8,6 +8,14 @@ export function getTimerList(data) {
         data
     })
 }
+
+export function getTimerById(data) {
+    return fetchCloudApi({
+        name: TIMER.GET_TIMER_BY_ID,
+        data
+    })
+}
+
 // 增 改
 export function postTimer(data) {
     return fetchCloudApi({

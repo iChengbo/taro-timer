@@ -15,10 +15,10 @@ class App extends Component {
   config = {
     pages: [
       'pages/home/index',
+      'pages/poster/index',
       'pages/login/index',
       'pages/publish/index',
       'pages/user/index',
-      'pages/poster/index',
       'pages/user/feedBack/index',
     ],
     window: {
@@ -29,6 +29,8 @@ class App extends Component {
     },
     cloud: true,
     tabBar: {
+      color: '#bfbfbf',
+      selectedColor: '#6190E8',
       list: [{
         pagePath: "pages/home/index",
         text: "首页",

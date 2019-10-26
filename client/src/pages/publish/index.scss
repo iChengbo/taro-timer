@@ -5,6 +5,7 @@
     margin-top: 40px;
     margin-left: 150px;
     margin-right: 150px;
+    color: #000000;
     &-btn{
         display: flex;
         flex: 1;
@@ -15,4 +16,7 @@
     margin-top: 100px;
     padding-left: 60px;
     padding-right: 60px;
+}
+.at-input--disabled{
+    opacity: 1;
 }

@@ -9,7 +9,7 @@ page{
     // overflow: hidden;
     // display: flex;
     // flex: 1;
-    background-color: red;
+    // background-color: red;
     &__fab{
         position: fixed;
         bottom: 0px;
@@ -22,6 +22,17 @@ page{
         flex-direction: row;
         justify-content: center;
         align-items: center;
+    }
+    &__introduct{
+        height: 200px;
+        padding-top: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        &-text{
+            font-size: 32px;
+        }
     }
     &__backImage{
         height: 100%;

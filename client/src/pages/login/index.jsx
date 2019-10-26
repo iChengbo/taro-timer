@@ -54,6 +54,10 @@ export default class Login extends Component {
         }
     }
 
+    handleCancle() {
+        Taro.navigateBack();
+    }
+
     render() {
         const { screenWidth, screenHeight, windowHeight, statusBarHeight } = Taro.getSystemInfoSync()
 
@@ -61,10 +65,17 @@ export default class Login extends Component {
 
         return (
             <View className='loginPage'>
-                <View></View>
-                <View className='loginBtn'>
+                <View className='loginPage__note'>
+                    <Text className='loginPage__note-text'>登录后方可使用全部功能哦\n请在稍后的提示框中点击“允许”</Text>
+                </View>
+                <View className='loginPage__buttons'>
                     <AtButton
-                        circle={true}
+                        customStyle={{width: '100px'}}
+                        type="secondary"
+                        onClick={ () => this.handleCancle()}
+                    >取消</AtButton>
+                    <AtButton
+                        customStyle={{width: '100px'}}
                         type="primary"
                         openType="getUserInfo"
                         onGetUserInfo={(e) => this.onGotUserInfo(e)}

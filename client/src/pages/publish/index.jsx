@@ -1,10 +1,10 @@
 import Taro, { Component } from '@tarojs/taro'
-import { View, Text, Input, Picker, Button } from '@tarojs/components'
+import { View, Picker } from '@tarojs/components'
 
-import { AtInput, AtSwitch, AtButton, AtActivityIndicator } from 'taro-ui'
+import { AtInput, AtButton, AtActivityIndicator } from 'taro-ui'
 
 import { getTimeInfo } from '../../utils/timeFunctions';
-import { postTimer } from '../../apis/timer';
+import { postTimer, getTimerById } from '../../apis/timer';
 import { throttle } from 'lodash';
 import './index.scss';
 
@@ -34,14 +34,8 @@ export default class Publish extends Component {
         const { _id } = this.$router.params;
         console.log('_id', _id);
         if (!!_id) {
-            Taro.cloud.callFunction({
-                name: 'getTimerById',
-                config: {
-                    env: process.env.NODE_ENV
-                },
-                data: {
-                    _id,
-                }
+            getTimerById({
+                _id
             }).then(res => {
                 const { title, dateSel, timeSel, isCountDown, isTop } = res.result;
                 console.log('获取时间事件成功', res)
@@ -157,6 +151,7 @@ export default class Publish extends Component {
                     <AtButton full={false} size='small' circle={true} type={isCountDown ? 'primary' : 'secondary'} onClick={() => this.onIsCountDownChange(true)}>倒计时</AtButton>
                 </View>
                 <AtInput
+                    focus={true}
                     name='value'
                     title='标题'
                     type='text'
@@ -167,7 +162,7 @@ export default class Publish extends Component {
                 <View className='page-body'>
                     <View className='page-section'>
                         <View>
-                            <Picker mode='date' onChange={this.onDateChange}>
+                            <Picker mode='date' value={dateSel} onChange={this.onDateChange}>
                                 <AtInput
                                     name='value'
                                     title='日期'
@@ -180,7 +175,7 @@ export default class Publish extends Component {
                     </View>
                     <View className='page-section'>
                         <View>
-                            <Picker mode='time' onChange={this.onTimeChange}>
+                            <Picker mode='time' value={timeSel} onChange={this.onTimeChange}>
                                 <View className='picker'>
                                     <AtInput
                                         name='value'
