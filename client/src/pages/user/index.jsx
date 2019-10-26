@@ -4,7 +4,9 @@ import {
     View,
 } from '@tarojs/components';
 
-import { AtAvatar, AtFab, AtList, AtListItem } from "taro-ui";
+import { AtAvatar, AtButton, AtList, AtListItem } from "taro-ui";
+import { postUserInfo } from '../../apis/user';
+import { isLoggin } from '../../utils/checker';
 
 import './index.scss';
 
@@ -26,7 +28,32 @@ export default class User extends Component {
         })
     }
 
+    onGotUserInfo(e) {
+        console.log(e)
+        const { detail } = e;
+        if (detail.errMsg.endsWith('ok')) {
+            const userInfo = JSON.parse(detail.rawData)
+            const { nickName, gender, avatarUrl, city, country, language, province } = userInfo
+            postUserInfo({
+                name: nickName,
+                gender: gender,
+                avatarUrl: avatarUrl,
+                city: city,
+                country: country,
+                language: language,
+                province: province
+            }).then(res => {
+                this.setState({
+                    context: res.result,
+                    userInfo: res.result
+                })
+            })
+        }
+    }
+
     render() {
+        const { userInfo } = this.state;
+        
         return (
             <View className='user'>
                 {/* <View className='user__fab'>
@@ -37,6 +64,13 @@ export default class User extends Component {
                 </View> */}
                 <View className='user__header'>
                     <AtAvatar openData={{ type: 'userAvatarUrl' }} size='large' circle={true}></AtAvatar>
+                    <AtButton
+                        customStyle={{ width: '100px'}}
+                        type="primary"
+                        size="small"
+                        openType="getUserInfo"
+                        onGetUserInfo={(e) => this.onGotUserInfo(e)}
+                    >登录</AtButton>
                 </View>
                 <View style={{ height: Taro.pxTransform(20) }}></View>
                 <AtList hasBorder={false}>
