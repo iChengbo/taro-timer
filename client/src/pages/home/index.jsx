@@ -6,8 +6,6 @@ import TimeListItem from '../../components/timeListItem'
 import { AtFab, AtDivider, AtButton } from 'taro-ui'
 
 import { getTimerList, deleteTimerById } from '../../apis/timer';
-import { postUserInfo } from '../../apis/user';
-import { isLoggin } from '../../utils/checker';
 import { COLOR } from '../../constants/colors';
 import { transformTime } from '../../utils/timeFunctions'
 
@@ -18,24 +16,12 @@ export default class Home extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            isAuthorize: false,
             timerRecordList: [],
         }
     }
 
     componentDidMount() {
-        isLoggin().then((res) => {
-            console.log('已授权', res)
-            this.setState({
-                isAuthorize: true,
-            })
-            this.refreshTimerList();
-        }).catch((err) => {
-            console.log('未授权', err)
-            // Taro.navigateTo({
-            //     url: '/pages/login/index'
-            // })
-        })
+        this.refreshTimerList();
 
         Taro.eventCenter.on('Publish.complete', () => {
             console.log('完成修改 我要刷新列表')
@@ -89,14 +75,8 @@ export default class Home extends Component {
     }
 
     handleClickAdd(item, index) {
-        isLoggin().then((res) => {
-            Taro.navigateTo({
-                url: '/pages/publish/index'
-            })
-        }).catch((err) => {
-            Taro.navigateTo({
-                url: '/pages/login/index'
-            })
+        Taro.navigateTo({
+            url: '/pages/publish/index'
         })
     }
 
@@ -135,49 +115,9 @@ export default class Home extends Component {
         })
     }
 
-    onGotUserInfo(e) {
-        console.log(e)
-        const { detail } = e;
-        if (detail.errMsg.endsWith('ok')) {
-            const userInfo = JSON.parse(detail.rawData)
-            const { nickName, gender, avatarUrl, city, country, language, province } = userInfo
-            postUserInfo({
-                name: nickName,
-                gender: gender,
-                avatarUrl: avatarUrl,
-                city: city,
-                country: country,
-                language: language,
-                province: province
-            }).then(res => {
-                Taro.eventCenter.trigger('Login.complete')
-                this.setState({
-                    isAuthorize: true
-                })
-            })
-        }
-    }
-
     render() {
 
         const { isAuthorize, timerRecordList = [] } = this.state;
-
-        // 未授权，即未登录
-        if (!isAuthorize) {
-            return (
-                <View className='index'>
-                    <View className='index__fab'>
-                        <AtFab onClick={() => this.handleClickAdd()}>
-                            <Text className='at-fab__icon at-icon at-icon-add'></Text>
-                        </AtFab>
-                    </View>
-                    <View className='index__introduct'>
-                        <Text className='index__introduct-text'>这里空空如也，登录后方添加第一条记录哦~</Text>
-                        <AtButton type='primary' openType="getUserInfo" onGetUserInfo={(e) => this.onGotUserInfo(e)}>登录</AtButton>
-                    </View>
-                </View>
-            )
-        }
 
         let goalList = [], memoList = [], overList = [];
         timerRecordList.forEach((item, index) => {

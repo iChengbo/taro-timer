@@ -1,7 +1,7 @@
 import Taro, { Component } from '@tarojs/taro'
-import { View, Text, Input, Picker, Button } from '@tarojs/components'
+import { View, Picker } from '@tarojs/components'
 
-import { AtInput, AtSwitch, AtButton, AtActivityIndicator } from 'taro-ui'
+import { AtInput, AtButton, AtActivityIndicator } from 'taro-ui'
 
 import { getTimeInfo } from '../../utils/timeFunctions';
 import { postTimer, getTimerById } from '../../apis/timer';
