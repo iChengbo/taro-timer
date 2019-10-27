@@ -9,12 +9,17 @@
         right: 0;
     }
     &__header{
-        height: 400px;
+        height: 200px;
+        padding-left: 30px;
         display: flex;
-        flex-direction: column;
-        justify-content: center;
+        flex-direction: row;
+        justify-content: flex-start;
         align-items: center;
         border-bottom: 1px solid #f4f4f4;
+        &-name{
+            font-size: 36px;
+            margin-left: 30px;
+        }
     }
     &__footer{
         display: flex;

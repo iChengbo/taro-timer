@@ -3,7 +3,7 @@ import { View, Text, Input, Picker, Button } from '@tarojs/components'
 import { AtButton } from 'taro-ui'
 
 
-import { postUserInfo } from '../../apis/user'
+import { postUserInfo } from '../../apis/user';
 import { isLoggin } from '../../utils/checker';
 
 import './index.scss'

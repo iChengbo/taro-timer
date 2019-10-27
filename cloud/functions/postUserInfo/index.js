@@ -6,7 +6,7 @@ const db = cloud.database();
 const userCollection = db.collection("user");
 
 exports.main = async event => {
-    const { OPENID } = cloud.getWXContext();
+    const { OPENID, UNIONID } = cloud.getWXContext();
     const { name, gender, avatarUrl, city, country, language, province } = event;
     console.log('event',event);
     
@@ -21,6 +21,7 @@ exports.main = async event => {
             await userCollection.add({
                 data: {
                     openId: OPENID,
+                    unionId: UNIONID,
                     createdTime: db.serverDate(),
                     name,
                     gender,
