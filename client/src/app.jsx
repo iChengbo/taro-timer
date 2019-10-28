@@ -15,11 +15,11 @@ class App extends Component {
   config = {
     pages: [
       'pages/home/index',
+      'pages/user/index',
       'pages/poster/index',
       'pages/login/index',
       'pages/publish/index',
-      'pages/user/index',
-      'pages/user/feedBack/index',
+      'pages/feedBack/index',
     ],
     window: {
       backgroundTextStyle: 'light',
