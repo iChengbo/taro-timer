@@ -11,15 +11,32 @@
     &__header{
         height: 200px;
         padding-left: 30px;
+        padding-right: 30px;
         display: flex;
         flex-direction: row;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid #f4f4f4;
+        &--left{
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        &--right{
+        }
         &-name{
             font-size: 36px;
             margin-left: 30px;
         }
+    }
+    &__sign{
+        height: 200px;
+        padding-left: 30px;
+        padding-right: 30px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
     }
     &__footer{
         display: flex;

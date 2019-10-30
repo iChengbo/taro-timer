@@ -6,6 +6,7 @@ import {
 
 import { AtAvatar, AtIcon, AtButton, AtList, AtListItem } from "taro-ui";
 import { postUserInfo } from '../../apis/user';
+import { dailySign } from '../../apis/activity';
 import { isLoggin } from '../../utils/checker';
 
 import './index.scss';
@@ -20,6 +21,7 @@ export default class User extends Component {
         this.state = {
             userInfo: {},
             isAuthorize: false,
+            isSigned: false,
         }
     }
 
@@ -51,6 +53,12 @@ export default class User extends Component {
         })
     }
 
+    shouldComponentUpdate(nextProps, nextState) {
+        if(this.state.isAuthorize !== nextState.isAuthorize) {
+            return true;
+        }
+    }
+
     handleClickListItem(pathAndParams) {
         Taro.navigateTo({
             url: pathAndParams,
@@ -74,14 +82,26 @@ export default class User extends Component {
             }).then(res => {
                 this.setState({
                     context: res.result,
-                    userInfo: res.result
+                    userInfo: res.result,
+                    isAuthorize: true
                 })
-            })
+            });
+            // 签到
+            dailySign().then((res) => {
+                console.log(res)
+                if(!!res.result.lastestSign) {
+                    this.setState({
+                        isSigned: true
+                    })
+                }
+            });
         }
     }
 
     render() {
-        const { userInfo, isAuthorize } = this.state;
+        const { userInfo, isAuthorize, isSigned } = this.state;
+        const signText = !!isSigned? '已签到' : '签到';
+        const buttonType = !!isSigned? 'secondary' : 'primary';
 
         return (
             <View className='user'>
@@ -91,20 +111,30 @@ export default class User extends Component {
                     </AtButton>
                 </View> */}
                 <View className='user__header'>
-                    <AtAvatar openData={{ type: 'userAvatarUrl' }} size='large' circle={true}></AtAvatar>
-                    {!!userInfo.nickName && <Text className='user__header-name'>{userInfo.nickName}</Text>}
-                    {!isAuthorize &&
+                    <View className='user__header--left'>
+                        <AtAvatar openData={{ type: 'userAvatarUrl' }} size='large' circle={true}></AtAvatar>
+                        {!!userInfo.nickName && <Text className='user__header-name'>{userInfo.nickName}</Text>}
+                    </View>
+                    <View className='user__header--right'>
                         <AtButton
                             customStyle={{ width: '100px', marginLeft: '40px' }}
-                            type="primary"
+                            type={buttonType}
+                            disabled={isSigned}
                             size="small"
+                            circle={true}
                             openType="getUserInfo"
                             onGetUserInfo={(e) => this.onGotUserInfo(e)}
-                        >登录</AtButton>
-                    }
+                        >{signText}</AtButton>
+                    </View>
                 </View>
-                <View style={{ height: Taro.pxTransform(20) }}></View>
+                {/* <View style={{ height: Taro.pxTransform(20) }}></View> */}
                 <AtList hasBorder={false}>
+                    <AtListItem
+                        onClick={() => this.handleClickListItem('/pages/feedBack/index')}
+                        title='我的签到表'
+                        arrow='right'
+                        iconInfo={{ size: 25, color: '#000', value: 'message' }}
+                    />
                     <AtListItem
                         onClick={() => this.handleClickListItem('/pages/feedBack/index')}
                         title='帮助与反馈'
