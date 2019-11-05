@@ -7,12 +7,23 @@ cloud.init({
 const db = cloud.database();
 const activityCollection = db.collection("activity");
 
+const ACTIVITY_TYPE = {
+    SIGN: 1,
+}
+
+
 // 云函数入口函数
 exports.main = async (event, context) => {
     const { OPENID } = cloud.getWXContext();
-    const { _id, sign } = event;
+    const { _id, type } = event;
     console.log('event: ', OPENID, event);
-    
+
+    let crtTime = +Date.now() + 8 * 60 * 60 * 1000;
+    let crtDate = new Date(crtTime);
+    let year = crtDate.getFullYear(), month = crtDate.getMonth() + 1, day = crtDate.getDate();
+    let YMD = year + '/' + month + '/' + day;
+    console.log('当前时间', crtDate, crtDate, `${year}/${month}/${day}`);
+
     try {
         const [activityRecord] = (await activityCollection.where({
             _id: _id,
@@ -25,31 +36,46 @@ exports.main = async (event, context) => {
                 data: {
                     openId: OPENID,
                     createdTime: db.serverDate(),
-                    signList: [],
-                    lastestSign: '',
+                    signList: [YMD],
+                    lastestSign: YMD,
                 },
             })
+            return {
+                signList: [],
+                lastestSign: YMD,
+            }
         } else {
             console.log("修改", OPENID);
-            // 签到
-            if (!!sign) {
-                let crtTime = +Date.now() + 8 * 60 * 60 * 1000;
-                let crtDate = new Date(crtTime);
-                let year = crtDate.getFullYear();
-                let month = crtDate.getMonth() + 1;
-                let day = crtDate.getDate();
-                let YMD = year + '/' + (month + 1) + '/' + day;
-                console.log('签到时间', crtDate, crtDate, `${year}/${month}/${day}`);
-                let signList = activityRecord.signList;
-                await activityCollection.doc(activityRecord._id).update({
-                    data: {
-                        signList: _.uniq(signList.concat(YMD)),
-                        lastestSign: YMD
+            switch(type) {
+                case ACTIVITY_TYPE.SIGN:
+                    let signList = activityRecord.signList;
+                    signList = _.uniq(signList.concat(YMD))
+                    let lastestSign = activityRecord.lastestSign;
+                    let continueDay = activityRecord.continueDay;
+                    let isContinue = !(new Date(year + '/' + month + '/' + (day-1))) - (new Date(lastestSign));
+                    console.log('是否是连续签到', new Date(year + '/' + month + '/' + (day-1))) - (new Date(lastestSign) )
+                    // 连续签到
+                    if(isContinue) {
+                        if(YMD != lastestSign) {
+                            continueDay += 1;
+                        }
+                    } else {
+                        continueDay = 1;
                     }
-                })
-                return {
-                    lastestSign: YMD
-                }
+                    await activityCollection.doc(activityRecord._id).update({
+                        data: {
+                            signList,
+                            lastestSign: YMD,
+                            continueDay
+                        }
+                    })
+                    return {
+                        signList,
+                        lastestSign: YMD,
+                        continueDay
+                    }
+                default:
+                    return {}
             }
         }
     } catch (error) {

@@ -6,7 +6,7 @@ import {
 
 import { AtAvatar, AtIcon, AtButton, AtList, AtListItem } from "taro-ui";
 import { postUserInfo } from '../../apis/user';
-import { dailySign } from '../../apis/activity';
+import { dailySign, getSignActivity } from '../../apis/activity';
 import { isLoggin } from '../../utils/checker';
 
 import './index.scss';
@@ -50,6 +50,13 @@ export default class User extends Component {
             })
         }).catch((err) => {
             console.log(4442, err)
+        })
+        getSignActivity().then((res) => {
+            console.log('activity',res);
+            let isSigned = res.result.isSigned;
+            this.setState({
+                isSigned: isSigned
+            })
         })
     }
 
@@ -99,21 +106,16 @@ export default class User extends Component {
     }
 
     render() {
-        const { userInfo, isAuthorize, isSigned } = this.state;
+        const { userInfo, isSigned } = this.state;
         const signText = !!isSigned? '已签到' : '签到';
         const buttonType = !!isSigned? 'secondary' : 'primary';
 
         return (
             <View className='user'>
-                {/* <View className='user__fab'>
-                    <AtButton openType={'share'} circle={true}>
-                        <AtIcon value='clock' size='30' color='#F00'></AtIcon>
-                    </AtButton>
-                </View> */}
                 <View className='user__header'>
                     <View className='user__header--left'>
                         <AtAvatar openData={{ type: 'userAvatarUrl' }} size='large' circle={true}></AtAvatar>
-                        {!!userInfo.nickName && <Text className='user__header-name'>{userInfo.nickName}</Text>}
+                        {<Text className='user__header-name'>{userInfo.nickName}</Text>}
                     </View>
                     <View className='user__header--right'>
                         <AtButton
@@ -130,10 +132,10 @@ export default class User extends Component {
                 {/* <View style={{ height: Taro.pxTransform(20) }}></View> */}
                 <AtList hasBorder={false}>
                     <AtListItem
-                        onClick={() => this.handleClickListItem('/pages/feedBack/index')}
+                        onClick={() => this.handleClickListItem('/pages/signRecord/index')}
                         title='我的签到表'
                         arrow='right'
-                        iconInfo={{ size: 25, color: '#000', value: 'message' }}
+                        iconInfo={{ size: 25, color: '#000', value: 'calendar' }}
                     />
                     <AtListItem
                         onClick={() => this.handleClickListItem('/pages/feedBack/index')}

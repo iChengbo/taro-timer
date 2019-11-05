@@ -15,5 +15,6 @@ export const POSTER = {
 }
 
 export const ACTIVITY = {
-    'POST_ACTIVITY': 'postActivity'
+    'POST_ACTIVITY': 'postActivity',
+    'GET_ACTIVITY': 'getActivity'
 }
