@@ -27,9 +27,10 @@ export default class User extends Component {
 
     // 微信小程序页面分享能力
     onShareAppMessage() {
-        const { nickName } = this.state.userInfo
+        const { nickName } = this.state.userInfo;
+        const _nickName = !!nickName ? nickName : '您的小伙伴'
         return {
-            title: `${nickName} 邀请您一起来记录美好时刻\n快去看看吧~`,
+            title: `${_nickName} 邀请您一起来记录美好时刻\n快去看看吧~`,
             path: '/pages/home/index',
             imageUrl: '../../images/shareImage.png'
         }
@@ -43,16 +44,19 @@ export default class User extends Component {
             })
             Taro.getUserInfo({
                 success: res => {
-                    this.setState({
-                        userInfo: res.userInfo
-                    })
+                    console.log('hshsh', res)
+                    if (!!res.userInfo && res.userInfo.nickName) {
+                        this.setState({
+                            userInfo: res.userInfo
+                        })
+                    }
                 }
             })
         }).catch((err) => {
             console.log(4442, err)
         })
         getSignActivity().then((res) => {
-            console.log('activity',res);
+            console.log('activity', res);
             let isSigned = res.result.isSigned;
             this.setState({
                 isSigned: isSigned
@@ -61,7 +65,7 @@ export default class User extends Component {
     }
 
     shouldComponentUpdate(nextProps, nextState) {
-        if(this.state.isAuthorize !== nextState.isAuthorize) {
+        if (this.state.isAuthorize !== nextState.isAuthorize) {
             return true;
         }
     }
@@ -96,7 +100,7 @@ export default class User extends Component {
             // 签到
             dailySign().then((res) => {
                 console.log(res)
-                if(!!res.result.lastestSign) {
+                if (!!res.result) {
                     this.setState({
                         isSigned: true
                     })
@@ -107,8 +111,8 @@ export default class User extends Component {
 
     render() {
         const { userInfo, isSigned } = this.state;
-        const signText = !!isSigned? '已签到' : '签到';
-        const buttonType = !!isSigned? 'secondary' : 'primary';
+        const signText = !!isSigned ? '已签到' : '签到';
+        const buttonType = !!isSigned ? 'secondary' : 'primary';
 
         return (
             <View className='user'>
@@ -146,7 +150,7 @@ export default class User extends Component {
                 </AtList>
                 <View className='user__footer'>
                     <AtButton
-                        customStyle={{ marginTop: '100px', marginLeft: '100px', marginRight: '100px'}}
+                        customStyle={{ marginTop: '100px', marginLeft: '100px', marginRight: '100px' }}
                         openType={'share'}
                         circle={true}
                         type='primary'

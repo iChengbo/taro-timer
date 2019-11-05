@@ -42,7 +42,7 @@ exports.main = async (event, context) => {
                 },
             })
             return {
-                signList: [],
+                signList: [TMD],
                 lastestSign: YMD,
                 continueDay: 1,
             }

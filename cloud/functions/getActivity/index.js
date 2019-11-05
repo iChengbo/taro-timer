@@ -15,6 +15,12 @@ exports.main = async (event, context) => {
     const { OPENID } = cloud.getWXContext()
     const { type } = event;
     console.log('event---', event);
+
+    let crtTime = +Date.now() + 8 * 60 * 60 * 1000;
+    let crtDate = new Date(crtTime);
+    let year = crtDate.getFullYear(), month = crtDate.getMonth() + 1, day = crtDate.getDate();
+    let YMD = year + '/' + month + '/' + day;
+
     try {
         switch(type) {
             case ACTIVITY_TYPE.SIGN:
@@ -22,10 +28,6 @@ exports.main = async (event, context) => {
                     openId: OPENID,
                 }).get()).data;
                 console.log("查询到的活动数据", actRecord);
-                let crtTime = +Date.now() + 8 * 60 * 60 * 1000;
-                let crtDate = new Date(crtTime);
-                let year = crtDate.getFullYear(), month = crtDate.getMonth() + 1, day = crtDate.getDate();
-                let YMD = year + '/' + month + '/' + day;
                 let isSigned = YMD == actRecord.lastestSign;
                 return {...actRecord, isSigned};
             default:
