@@ -38,11 +38,13 @@ exports.main = async (event, context) => {
                     createdTime: db.serverDate(),
                     signList: [YMD],
                     lastestSign: YMD,
+                    continueDay: 1,
                 },
             })
             return {
                 signList: [],
                 lastestSign: YMD,
+                continueDay: 1,
             }
         } else {
             console.log("修改", OPENID);
