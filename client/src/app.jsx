@@ -20,6 +20,7 @@ class App extends Component {
       'pages/login/index',
       'pages/publish/index',
       'pages/feedBack/index',
+      'pages/signRecord/index',
     ],
     window: {
       backgroundTextStyle: 'light',

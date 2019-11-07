@@ -1,0 +1,8 @@
+.signRecord{
+    padding-top: 50px;
+    &__footer{
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+}

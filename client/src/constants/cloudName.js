@@ -13,3 +13,8 @@ export const TIMER = {
 export const POSTER = {
     'GET_POSTER_LIST': 'getPosterList'
 }
+
+export const ACTIVITY = {
+    'POST_ACTIVITY': 'postActivity',
+    'GET_ACTIVITY': 'getActivity'
+}
