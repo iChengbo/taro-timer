@@ -29,9 +29,14 @@ export default class FeedBack extends Component {
                     title='2. 如何删除或重新编辑事件？'
                     note='答：轻点事件项试试哦...'
                 ></AtCard>
+                <View style={{ height: Taro.pxTransform(20) }}></View>
+                <AtCard
+                    title='3. 如何获得更多积分？'
+                    note='答：连续签到得更多积分哦...'
+                ></AtCard>
                 <View className='feedback__footer'>
                     <AtButton type='secondary' circle={true} openType='feedback'>其他问题反馈</AtButton>
-                    <View style={{height: Taro.pxTransform(20)}}></View>
+                    <View style={{ height: Taro.pxTransform(20) }}></View>
                     <AtButton type='secondary' circle={true} openType='contact'>联系客服</AtButton>
                 </View>
             </View>

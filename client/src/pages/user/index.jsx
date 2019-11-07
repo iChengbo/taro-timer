@@ -22,6 +22,7 @@ export default class User extends Component {
             userInfo: {},
             isAuthorize: false,
             isSigned: false,
+            gold: 0,
         }
     }
 
@@ -58,8 +59,10 @@ export default class User extends Component {
         getSignActivity().then((res) => {
             console.log('activity', res);
             let isSigned = res.result.isSigned;
+            let gold = res.result.gold
             this.setState({
-                isSigned: isSigned
+                isSigned: isSigned,
+                gold: !!gold ? gold : 0,
             })
         })
     }
@@ -73,6 +76,14 @@ export default class User extends Component {
     handleClickListItem(pathAndParams) {
         Taro.navigateTo({
             url: pathAndParams,
+        })
+    }
+
+    handleClickGold() {
+        Taro.showToast({
+            title: '积分商城暂未开启,敬请期待~',
+            icon: 'none',
+            duration: 2000
         })
     }
 
@@ -102,7 +113,8 @@ export default class User extends Component {
                 console.log(res)
                 if (!!res.result) {
                     this.setState({
-                        isSigned: true
+                        isSigned: true,
+                        gold: res.result.gold
                     })
                 }
             });
@@ -110,7 +122,7 @@ export default class User extends Component {
     }
 
     render() {
-        const { userInfo, isSigned } = this.state;
+        const { userInfo, isSigned, gold } = this.state;
         const signText = !!isSigned ? '已签到' : '签到';
         const buttonType = !!isSigned ? 'secondary' : 'primary';
 
@@ -133,8 +145,14 @@ export default class User extends Component {
                         >{signText}</AtButton>
                     </View>
                 </View>
-                {/* <View style={{ height: Taro.pxTransform(20) }}></View> */}
+                <View style={{ height: Taro.pxTransform(20), backgroundColor: '#F0F0F0' }}></View>
                 <AtList hasBorder={false}>
+                    <AtListItem
+                        onClick={() => this.handleClickGold()}
+                        title={`积分：${gold}`}
+                        arrow='right'
+                        iconInfo={{ size: 25, color: '#000', value: 'sketch' }}
+                    />
                     <AtListItem
                         onClick={() => this.handleClickListItem('/pages/signRecord/index')}
                         title='我的签到表'

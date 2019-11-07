@@ -15,7 +15,7 @@ const ACTIVITY_TYPE = {
 // 云函数入口函数
 exports.main = async (event, context) => {
     const { OPENID } = cloud.getWXContext();
-    const { _id, type } = event;
+    const { type } = event;
     console.log('event: ', OPENID, event);
 
     let crtTime = +Date.now() + 8 * 60 * 60 * 1000;
@@ -26,7 +26,6 @@ exports.main = async (event, context) => {
 
     try {
         const [activityRecord] = (await activityCollection.where({
-            _id: _id,
             openId: OPENID
         }).get()).data;
 
@@ -39,48 +38,65 @@ exports.main = async (event, context) => {
                     signList: [YMD],
                     lastestSign: YMD,
                     continueDay: 1,
+                    gold: 1,
                 },
             })
             return {
-                signList: [TMD],
+                signList: [YMD],
                 lastestSign: YMD,
                 continueDay: 1,
+                gold: 1
             }
         } else {
             console.log("修改", OPENID);
-            switch(type) {
+            switch (type) {
                 case ACTIVITY_TYPE.SIGN:
                     let signList = activityRecord.signList;
                     signList = _.uniq(signList.concat(YMD))
                     let lastestSign = activityRecord.lastestSign;
                     let continueDay = activityRecord.continueDay;
-                    let isContinue = !(new Date(year + '/' + month + '/' + (day-1))) - (new Date(lastestSign));
-                    console.log('是否是连续签到', new Date(year + '/' + month + '/' + (day-1))) - (new Date(lastestSign) )
+                    let isContinue = !(new Date(year + '/' + month + '/' + (day - 1))) - (new Date(lastestSign));
+                    console.log('是否是连续签到', new Date(year + '/' + month + '/' + (day - 1))) - (new Date(lastestSign))
                     // 连续签到
-                    if(isContinue) {
-                        if(YMD != lastestSign) {
+                    if (isContinue) {
+                        if (YMD != lastestSign) {
                             continueDay += 1;
                         }
                     } else {
                         continueDay = 1;
                     }
+                    // 计算签到所得金币
+                    let gold = activityRecord.gold;
+                    if (continueDay <= 0) {
+                        gold = gold;
+                    } else if (continueDay <= 7) {
+                        gold += continueDay;
+                    } else {
+                        gold += 7;
+                    }
                     await activityCollection.doc(activityRecord._id).update({
                         data: {
                             signList,
                             lastestSign: YMD,
-                            continueDay
+                            continueDay,
+                            gold
                         }
                     })
                     return {
                         signList,
                         lastestSign: YMD,
-                        continueDay
+                        continueDay,
+                        gold
                     }
                 default:
                     return {}
             }
         }
     } catch (error) {
-
+        console.error('出错了', error);
+        return {
+            code: 500,
+            msg: '服务器错误'
+        }
     }
 }
