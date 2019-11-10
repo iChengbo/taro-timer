@@ -55,10 +55,12 @@ exports.main = async (event, context) => {
                     signList = _.uniq(signList.concat(YMD))
                     let lastestSign = activityRecord.lastestSign;
                     let continueDay = activityRecord.continueDay;
-                    let isContinue = !(new Date(year + '/' + month + '/' + (day - 1))) - (new Date(lastestSign));
-                    console.log('是否是连续签到', new Date(year + '/' + month + '/' + (day - 1))) - (new Date(lastestSign))
+                    let isContinue = (+new Date(year + '/' + month + '/' + (day - 1))) - (+new Date(lastestSign));
+                    console.log('本次签到前一天', `${year}/${month}/${day-1}`, +new Date(year + '/' + month + '/' + (day - 1)));
+                    console.log('上次签到时间', lastestSign, +new Date(lastestSign));
+                    console.log('是否是连续签到, ', isContinue, (+new Date(year + '/' + month + '/' + (day - 1))) - (+new Date(lastestSign)));
                     // 连续签到
-                    if (isContinue) {
+                    if (isContinue == 0) {
                         if (YMD != lastestSign) {
                             continueDay += 1;
                         }
