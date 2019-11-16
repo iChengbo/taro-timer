@@ -11,6 +11,7 @@ const ACTIVITY_TYPE = {
     SIGN: 1,
 }
 
+const ONE_DAY = 1 * 24 * 60 * 60 *1000;
 
 // 云函数入口函数
 exports.main = async (event, context) => {
@@ -55,12 +56,12 @@ exports.main = async (event, context) => {
                     signList = _.uniq(signList.concat(YMD))
                     let lastestSign = activityRecord.lastestSign;
                     let continueDay = activityRecord.continueDay;
-                    let isContinue = (+new Date(year + '/' + month + '/' + (day - 1))) - (+new Date(lastestSign));
+                    let isContinue = (+new Date(year + '/' + month + '/' + day)) - (+new Date(lastestSign)) == ONE_DAY;
                     console.log('本次签到前一天', `${year}/${month}/${day-1}`, +new Date(year + '/' + month + '/' + (day - 1)));
                     console.log('上次签到时间', lastestSign, +new Date(lastestSign));
                     console.log('是否是连续签到, ', isContinue, (+new Date(year + '/' + month + '/' + (day - 1))) - (+new Date(lastestSign)));
                     // 连续签到
-                    if (isContinue == 0) {
+                    if (isContinue) {
                         if (YMD != lastestSign) {
                             continueDay += 1;
                         }
