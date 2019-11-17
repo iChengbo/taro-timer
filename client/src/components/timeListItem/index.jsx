@@ -28,20 +28,12 @@ export default class TimeListItem extends Component {
         }
     }
 
-    componentWillMount() {}
- 
     componentDidMount() {
         this.props.isCountDown? this.countDown() : this.countUp()
     }
 
     componentWillUnmount() {
         clearTimeout(this.state.timer)
-    }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        if(this.props.isCountDown !== nextProps.isCountDown) {
-            return true;
-        }
     }
 
     clearTimer() {
