@@ -5,7 +5,7 @@
 	"description": "时间节点",
 	"appid": "wx5a6985631f81a2bb",
 	"setting": {
-		"urlCheck": true,
+		"urlCheck": false,
 		"es6": false,
 		"enhance": false,
 		"postcss": false,
@@ -23,11 +23,13 @@
 			"disablePlugins": [],
 			"outputPath": ""
 		},
-		"bundle": false
+		"bundle": false,
+		"showShadowRootInWxmlPanel": true
 	},
 	"compileType": "miniprogram",
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},
 	"cloudfunctionTemplateRoot": "cloudfunctionTemplate",
+	"libVersion": "2.9.4",
 	"condition": {}
 }

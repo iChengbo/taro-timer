@@ -13,6 +13,14 @@ export function postActivity(data) {
     })
 }
 
+// 获取活动信息
+export function getActivity(data) {
+    return fetchCloudApi({
+        name: ACTIVITY.GET_ACTIVITY,
+        data
+    })
+}
+
 // 签到
 export function dailySign() {
     return fetchCloudApi({
@@ -20,14 +28,6 @@ export function dailySign() {
         data: {
             type: ACTIVITY_TYPE.SIGN,
         }
-    })
-}
-
-// 获取活动信息
-export function getActivity(data) {
-    return fetchCloudApi({
-        name: ACTIVITY.GET_ACTIVITY,
-        data
     })
 }
 

@@ -58,12 +58,12 @@ export default class Index extends Component {
 
     updateTimerById(_id) {
         getTimerById({_id}).then((res) => {
-            const { dateSel, timeSel } = res.result;
+            const { dateSel, timeSel } = res;
             const goalSeconds = transformTime(dateSel, timeSel);
             const timeSeconds = Math.abs((goalSeconds - Date.now())/1000)
             console.log('获取时间事件成功', res, goalSeconds)
             this.setState({
-                timerItem: res.result,
+                timerItem: res,
                 timeSeconds,
                 goalSeconds: goalSeconds/1000
             }, () => {
@@ -254,9 +254,13 @@ export default class Index extends Component {
             success: (res) => {
                 if (res.confirm) {
                     deleteTimerById({ _id }).then(res => {
-                        console.log('删除成功', res);
-                        Taro.eventCenter.trigger('Poster.delete');
-                        Taro.navigateBack();
+                        if (res.errMsg == 'document.remove:ok') {
+                            console.log('删除成功', res);
+                            Taro.eventCenter.trigger('Poster.delete');
+                            Taro.navigateBack();
+                        } else {
+                            console.log('删除失败');
+                        }
                     })
                 } else {
                     console.log('用户点击取消')

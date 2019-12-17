@@ -40,8 +40,6 @@ export default class Home extends Component {
             })
         })
 
-        this.refreshTimerList();
-
         Taro.eventCenter.on('Publish.complete', () => {
             console.log('完成修改 我要刷新列表')
             this.refreshTimerList();
@@ -55,14 +53,8 @@ export default class Home extends Component {
             this.refreshTimerList();
         });
     }
-
-    shouldComponentUpdate(nextProps, nextState) {
-        if (this.state.isAuthorize !== nextState.isAuthorize) {
-            return true;
-        }
-        if (this.state.timerRecordList.length != nextState.timerRecordList.length) {
-            return true;
-        }
+    componentDidShow() {
+        this.refreshTimerList();
     }
 
     // 微信小程序页面分享能力
@@ -75,10 +67,10 @@ export default class Home extends Component {
 
     refreshTimerList() {
         console.log('我要获取或刷新列表')
-        getTimerList({}).then((res) => {
+        getTimerList().then((res) => {
             console.log('获取列表成功', res)
             this.setState({
-                timerRecordList: res.result,
+                timerRecordList: res,
             })
         }).catch(err => {
             console.log('获取列表失败', err)
@@ -119,14 +111,12 @@ export default class Home extends Component {
             content: '确认删除该记录吗？',
             success: (res) => {
                 if(res.confirm) {
-                    deleteTimerById({
-                        _id: timerItem._id
-                    }).then((res) => {
-                        if(!!res.result) {
-                            console.log('删除成功')
-                            Taro.eventCenter.trigger('Poster.delete')
+                    deleteTimerById(timerItem).then(res => {
+                        if (res.errMsg == 'document.remove:ok') {
+                            console.log('删除成功', res);
+                            Taro.eventCenter.trigger('Poster.delete');
                         } else {
-                            console.log('删除失败')
+                            console.log('删除失败');
                         }
                     })
                 }
@@ -169,10 +159,6 @@ export default class Home extends Component {
                         <Text className='at-fab__icon at-icon at-icon-add'></Text>
                     </AtFab>
                 </View>
-                {/* <Image
-                    className='index__backImage'
-                    src='http://pic.51yuansu.com/backgd/cover/00/35/48/5bd7c7ae02be4.jpg!/fw/780/quality/90/unsharp/true/compress/true'
-                /> */}
                 <View scrollY className='index__body' style={{ backgroundColor: '#ffffff', width: '100%' }}>
                     {overList.length > 0 && <AtDivider content='超时倒计时' fontColor={COLOR.RED_1} lineColor={COLOR.RED_1} />}
                     {overList.map((item, index) => {

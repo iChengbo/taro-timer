@@ -1,13 +1,15 @@
 import Taro, { Component } from '@tarojs/taro'
 import { View, Picker } from '@tarojs/components'
 
-import { AtInput, AtButton, AtActivityIndicator } from 'taro-ui'
+import { AtInput, AtButton, AtImagePicker, AtActivityIndicator } from 'taro-ui'
 
 import { getTimeInfo } from '../../utils/timeFunctions';
-import { postTimer, getTimerById } from '../../apis/timer';
+import { postTimer, updateTimerById, getTimerById } from '../../apis/timer';
 import { throttle } from 'lodash';
 import './index.scss';
 
+
+const MAX_IMAGE_NUMBER = 1;
 export default class Publish extends Component {
 
     config = {
@@ -25,6 +27,7 @@ export default class Publish extends Component {
             isTop: false,
             loading: true,
             isSaving: false,
+            images: [],
         }
 
         this.handleSave = throttle(this.handleSave, 1000);
@@ -37,7 +40,7 @@ export default class Publish extends Component {
             getTimerById({
                 _id
             }).then(res => {
-                const { title, dateSel, timeSel, isCountDown, isTop } = res.result;
+                const { title, dateSel, timeSel, isCountDown, isTop } = res;
                 console.log('获取时间事件成功', res)
                 this.setState({
                     title,
@@ -64,38 +67,53 @@ export default class Publish extends Component {
         }
     }
 
+    handleChangeImages(images) {
+        console.log('图片资源', images)
+        this.setState({
+            images
+        })
+    }
+
     handleSave() {
         const { _id } = this.$router.params;
-        const { title, dateSel, timeSel, isCountDown, isTop } = this.state;
-        // console.log(1111, _id, title, dateSel, timeSel, isCountDown, isTop)
-        const data = !!_id ? {
-            _id,
+        const { title, dateSel, timeSel, isCountDown, isTop, images } = this.state;
+        const data = {
             title,
             dateSel,
             timeSel,
             isCountDown,
-            isTop
-        } : {
-                title,
-                dateSel,
-                timeSel,
-                isCountDown,
-                isTop
-            };
+            isTop,
+            images
+        }
         this.setState({
             isSaving: true,
         }, () => {
-            postTimer(data).then((res) => {
-                if (res.result.code != 500) {
-                    console.log('存储成功', res)
-                    Taro.eventCenter.trigger('Publish.complete')
-                    Taro.navigateBack()
-                } else {
-                    console.log('存储失败', res)
-                }
-            }).catch(err => {
-                console.log('存储失败', err)
-            })
+            if (!_id) {
+                postTimer(data).then((res) => {
+                    if (res.errMsg == 'collection.add:ok') {
+                        console.log('存储成功', res)
+                        Taro.eventCenter.trigger('Publish.complete')
+                        Taro.navigateBack()
+                    } else {
+                        console.log('存储失败', res)
+                    }
+                }).catch(err => {
+                    console.log('存储失败', err)
+                })
+            } else {
+                // 修改
+                updateTimerById(_id, data).then(res => {
+                    if (res.errMsg == 'document.update:ok') {
+                        console.log('更新成功', res);
+                        Taro.eventCenter.trigger('Publish.complete');
+                        Taro.navigateBack();
+                    } else {
+                        console.log('更新失败', res)
+                    }
+                }).catch(err => {
+                    console.log('更新失败', err)
+                })
+            }
         })
     }
 
@@ -133,7 +151,7 @@ export default class Publish extends Component {
     }
 
     render() {
-        const { dateSel, timeSel, isCountDown, title, isSaving } = this.state;
+        const { dateSel, timeSel, isCountDown, title, isSaving, images } = this.state;
         const { screenWidth, windowHeight } = Taro.getSystemInfo()
 
         if (this.state.loading) {
@@ -189,6 +207,14 @@ export default class Publish extends Component {
                         </View>
                     </View>
                     {/* <AtSwitch title='置顶' onChange={(value) => this.onIsTopChange(value)} /> */}
+                    <AtImagePicker
+                        length={4}
+                        count={MAX_IMAGE_NUMBER - images.length}
+                        showAddBtn={images.length < MAX_IMAGE_NUMBER}
+                        files={images}
+                        onChange={this.handleChangeImages.bind(this)}
+                    >
+                    </AtImagePicker>
                 </View>
                 <View className='save-btn'>
                     <AtButton type='primary' loading={isSaving} disabled={!title && !isSaving} circle={true} onClick={() => this.handleSave()}>保存</AtButton>

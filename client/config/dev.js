@@ -1,6 +1,6 @@
 module.exports = {
   env: {
-    NODE_ENV: '"weapp-dev-id"'
+    NODE_ENV: '"development"'
   },
   defineConstants: {
   },

@@ -34,15 +34,7 @@ export default class Login extends Component {
         if (detail.errMsg.endsWith('ok')) {
             const userInfo = JSON.parse(detail.rawData)
             const { nickName, gender, avatarUrl, city, country, language, province } = userInfo
-            postUserInfo({
-                name: nickName,
-                gender: gender,
-                avatarUrl: avatarUrl,
-                city: city,
-                country: country,
-                language: language,
-                province: province
-            }).then(res => {
+            postUserInfo(userInfo).then(res => {
                 Taro.eventCenter.trigger('Login.complete')
                 this.setState({
                     context: res.result,

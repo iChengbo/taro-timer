@@ -5,7 +5,7 @@ import {
 } from '@tarojs/components';
 
 import { AtAvatar, AtIcon, AtButton, AtList, AtListItem } from "taro-ui";
-import { postUserInfo } from '../../apis/user';
+import { getUserInfo, postUserInfo, updateUserInfo } from '../../apis/user';
 import { dailySign, getSignActivity } from '../../apis/activity';
 import { isLoggin } from '../../utils/checker';
 
@@ -19,6 +19,8 @@ export default class User extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            isRegistered: false,
+            openId: '',
             userInfo: {},
             isAuthorize: false,
             isSigned: false,
@@ -37,23 +39,19 @@ export default class User extends Component {
     }
 
     componentDidMount() {
-        isLoggin().then((res) => {
-            console.log(4441, res)
-            this.setState({
-                isAuthorize: true,
-            })
-            Taro.getUserInfo({
-                success: res => {
-                    console.log('hshsh', res)
-                    if (!!res.userInfo && res.userInfo.nickName) {
-                        this.setState({
-                            userInfo: res.userInfo
-                        })
-                    }
-                }
-            })
-        }).catch((err) => {
-            console.log(4442, err)
+        getUserInfo().then(res => {
+            console.log('获取到的用户数据', res);
+            if (!!res.openId) {
+                this.setState({
+                    isRegistered: true,
+                    userInfo: res,
+                    openId: res.openId,
+                });
+                Taro.setStorage({
+                    key: "userInfo",
+                    data: res,
+                });
+            }
         })
         getSignActivity().then((res) => {
             console.log('activity', res);
@@ -80,23 +78,25 @@ export default class User extends Component {
         console.log(e)
         const { detail } = e;
         if (detail.errMsg.endsWith('ok')) {
-            const userInfo = JSON.parse(detail.rawData)
-            const { nickName, gender, avatarUrl, city, country, language, province } = userInfo
-            postUserInfo({
-                name: nickName,
-                gender: gender,
-                avatarUrl: avatarUrl,
-                city: city,
-                country: country,
-                language: language,
-                province: province
-            }).then(res => {
-                this.setState({
-                    context: res.result,
-                    userInfo: res.result,
-                    isAuthorize: true
-                })
+            const userInfo = JSON.parse(detail.rawData);
+            this.setState({
+                userInfo
+            })
+            Taro.setStorage({
+                key: "userInfo",
+                data: userInfo,
             });
+            const { isRegistered, openId } = this.state;
+            if (!!isRegistered) {
+                // 更新
+                updateUserInfo(openId, userInfo).then(res => {
+                    console.log('更新用户信息', res);
+                })
+            } else {
+                postUserInfo(userInfo).then(res => {
+                    console.log('新增用户', res);
+                })
+            }
             // 签到
             dailySign().then((res) => {
                 console.log(res)

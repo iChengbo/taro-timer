@@ -17,7 +17,7 @@ class App extends Component {
       'pages/home/index',
       'pages/user/index',
       'pages/poster/index',
-      'pages/login/index',
+      // 'pages/login/index',
       'pages/publish/index',
       'pages/feedBack/index',
       'pages/signRecord/index',
