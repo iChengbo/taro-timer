@@ -15,10 +15,10 @@ class App extends Component {
   config = {
     pages: [
       'pages/home/index',
+      'pages/publish/index',
       'pages/user/index',
       'pages/poster/index',
       // 'pages/login/index',
-      'pages/publish/index',
       'pages/feedBack/index',
       'pages/signRecord/index',
     ],
@@ -50,7 +50,7 @@ class App extends Component {
   componentDidMount() {
     if (process.env.TARO_ENV === 'weapp') {
       Taro.cloud.init({
-        env: process.env.NODE_ENV,
+        env: process.env.NODE_ENV !== 'production' ? 'weapp-dev-id' : 'weapp-release-id',
         traceUser: true
       })
     }
